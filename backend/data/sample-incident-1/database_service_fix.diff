@@ -1,0 +1,100 @@
+diff --git a/src/main/java/com/example/oncall/service/DatabaseService.java b/src/main/java/com/example/oncall/service/DatabaseService.java
+index 1234567..abcdefg 100644
+--- a/src/main/java/com/example/oncall/service/DatabaseService.java
++++ b/src/main/java/com/example/oncall/service/DatabaseService.java
+@@ -89,15 +89,19 @@ public class DatabaseService {
+     }
+ 
+     public User findUserById(Long userId) throws SQLException {
+-        Connection conn = dataSource.getConnection();
+-        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE id = ?");
+-        stmt.setLong(1, userId);
+-        
+-        ResultSet rs = stmt.executeQuery();
+-        if (rs.next()) {
+-            return mapResultSetToUser(rs);
++        Connection conn = null;
++        PreparedStatement stmt = null;
++        ResultSet rs = null;
++        try {
++            conn = dataSource.getConnection();
++            stmt = conn.prepareStatement("SELECT * FROM users WHERE id = ?");
++            stmt.setLong(1, userId);
++            
++            rs = stmt.executeQuery();
++            if (rs.next()) {
++                return mapResultSetToUser(rs);
++            }
++            return null;
++        } catch (SQLException e) {
++            logger.error("Failed to find user by id: " + userId, e);
++            throw e;
++        } finally {
++            // Fix: Always close resources in finally block to prevent connection leaks
++            if (rs != null) {
++                try { rs.close(); } catch (SQLException e) { /* ignore */ }
++            }
++            if (stmt != null) {
++                try { stmt.close(); } catch (SQLException e) { /* ignore */ }
++            }
++            if (conn != null) {
++                try { conn.close(); } catch (SQLException e) { /* ignore */ }
++            }
+         }
+-        return null;
+     }
+ 
+     public void executeWithRetry(String sql, int maxRetries) {
+@@ -112,8 +116,12 @@ public class DatabaseService {
+                 return;
+             } catch (SQLException e) {
+                 retryCount++;
++                logger.warn("Database operation failed, attempt {} of {}: {}", 
++                           retryCount, maxRetries, e.getMessage());
+                 if (retryCount >= maxRetries) {
+-                    throw new RuntimeException("Database operation failed after " + maxRetries + " attempts");
++                    logger.error("Database operation failed after {} retry attempts", maxRetries);
++                    throw new RuntimeException("Database connection failed after " + maxRetries + " retry attempts", e);
+                 }
++                // Add exponential backoff
+                 try {
+-                    Thread.sleep(1000 * retryCount);
++                    Thread.sleep(1000 * (long) Math.pow(2, retryCount - 1));
+                 } catch (InterruptedException ie) {
+@@ -125,6 +133,11 @@ public class DatabaseService {
+         }
+     }
+ 
++    public ConnectionPoolStats getConnectionPoolStats() {
++        HikariPoolMXBean poolBean = ((HikariDataSource) dataSource).getHikariPoolMXBean();
++        return new ConnectionPoolStats(poolBean.getActiveConnections(), poolBean.getIdleConnections(), poolBean.getTotalConnections());
++    }
++
+     private User mapResultSetToUser(ResultSet rs) throws SQLException {
+         User user = new User();
+         user.setId(rs.getLong("id"));
+diff --git a/src/main/java/com/example/oncall/config/DatabaseConfig.java b/src/main/java/com/example/oncall/config/DatabaseConfig.java
+index 2345678..bcdefgh 100644
+--- a/src/main/java/com/example/oncall/config/DatabaseConfig.java
++++ b/src/main/java/com/example/oncall/config/DatabaseConfig.java
+@@ -15,7 +15,7 @@ public class DatabaseConfig {
+         HikariConfig config = new HikariConfig();
+         config.setJdbcUrl(jdbcUrl);
+         config.setUsername(username);
+         config.setPassword(password);
+-        config.setMaximumPoolSize(20);
++        config.setMaximumPoolSize(100);  // Increased from 20 to handle peak traffic
+         config.setMinimumIdle(5);
+         config.setConnectionTimeout(30000);
+         config.setIdleTimeout(600000);
+@@ -23,6 +23,10 @@ public class DatabaseConfig {
+         config.setMaxLifetime(1800000);
+         config.setConnectionTestQuery("SELECT 1");
+         config.setLeakDetectionThreshold(60000);  // Detect connection leaks after 60 seconds
++        
++        // Enable connection pool monitoring
++        config.setRegisterMbeans(true);
++        config.setPoolName("HikariPool-1");
+         
+         return new HikariDataSource(config);
+     } 
