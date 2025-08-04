@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Oncall Lens - Incident Analyzer",
+  title: "🔍 Oncall Lens - Incident Analyzer",
   description: "AI-powered incident analysis tool for on-call engineers",
 };
 

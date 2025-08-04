@@ -52,7 +52,7 @@ export default function Home() {
                 <Zap className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-foreground">Oncall Lens</h1>
+                <h1 className="text-xl font-bold text-foreground">🔍 Oncall Lens</h1>
                 <p className="text-xs text-muted">Incident Analyzer</p>
               </div>
             </div>
