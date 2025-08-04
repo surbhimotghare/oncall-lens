@@ -16,43 +16,37 @@ oncall-lens/
 │       ├── knowledge-base/   # Historical postmortem files (.md)
 │       └── sample-incident-1/ # Test incident files
 ├── frontend/                 # Next.js frontend (coming soon)
-└── README.md
+└── README.md                # This file
 ```
 
-## 🚀 Quick Start
+## 🚀 Technology Stack
 
-### 1. Download Starter Kit Files
+- **Backend**: FastAPI (Python)
+- **Frontend**: Next.js (React/TypeScript) 
+- **AI Orchestration**: LangChain + LangGraph
+- **LLM**: OpenAI GPT-4o
+- **Embeddings**: OpenAI text-embedding-3-small
+- **Vector DB**: Qdrant
+- **Evaluation**: RAGAS
+- **Monitoring**: LangSmith
 
-You need to manually download these files to test the system:
+## 🎯 Features
 
-#### Historical Knowledge Base (for RAG)
-**Location**: `backend/data/knowledge-base/`
+- **Multi-Modal File Processing**: Handles logs, stack traces, code diffs, and screenshots
+- **Intelligent Agent System**: 4-agent workflow for comprehensive incident analysis
+- **Historical Context**: RAG-powered search through past incident postmortems
+- **Root Cause Analysis**: AI-powered identification of likely failure causes
+- **Actionable Recommendations**: Prioritized next steps for incident resolution
 
-1. **GitHub Postmortems Repository**: https://github.com/dastergon/postmortems
-   - Download 3-5 `.md` files from different companies (GitLab, Google, etc.)
-   - Save them in `backend/data/knowledge-base/`
+## 🔧 Development Setup
 
-#### Sample Incident Files  
-**Location**: `backend/data/sample-incident-1/`
+### Prerequisites
+- Python 3.13+
+- Node.js 18+ (for frontend)
+- Qdrant server (Docker recommended)
+- OpenAI API key
 
-1. **Log File**: 
-   - URL: https://raw.githubusercontent.com/logpai/loghub/master/HDFS/HDFS_1k.log
-   - Save as: `HDFS_1k.log`
-
-2. **Diff File**:
-   - URL: https://github.com/psf/requests/commit/c0c4b7062e57c83344655a13c32791485a73dd70.diff
-   - Save as: `bugfix.diff`
-
-3. **Stack Trace**:
-   - URL: https://gist.github.com/gregmalcolm/5565391
-   - Copy the text content and save as: `stack_trace.txt`
-
-4. **Metric Graph**:
-   - URL: https://grafana.com/static/assets/img/blog/mixed-data-source-cpu-usage.png
-   - Save as: `cpu_spike.png`
-
-### 2. Backend Setup
-
+### Backend Setup
 ```bash
 cd backend
 python -m venv venv
@@ -60,59 +54,140 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 3. Environment Variables
-
-Create a `.env` file in the backend directory:
-
+### Environment Configuration
 ```bash
-OPENAI_API_KEY=your_openai_api_key_here
-TAVILY_API_KEY=your_tavily_api_key_here  # Optional for external search
+cp .env.template .env
+# Edit .env with your API keys:
+# ONCALL_OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-### 4. Run the Backend
-
+### Start Qdrant (Docker)
 ```bash
-uvicorn main:app --reload --port 8000
+docker run -p 6333:6333 qdrant/qdrant
 ```
 
-### 5. Test the System
+### Start Backend Server
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
 
-Upload the sample incident files to `/summarize` endpoint and get an AI-powered incident summary!
+Visit `http://localhost:8000/docs` for interactive API documentation.
 
-## 🧠 How It Works
+## 📊 Current Implementation Status
 
-1. **Data Triage Agent**: Processes different file types (logs, diffs, images, text)
-2. **Historical Analyst Agent**: Uses RAG to search through postmortem knowledge base
-3. **External Researcher Agent**: Searches public documentation for unknown errors
-4. **Manager Agent**: Orchestrates the entire workflow
-5. **Synthesizer Agent**: Generates final incident summary
+### ✅ Completed
+- [x] **Phase 1**: Backend foundation with FastAPI
+- [x] **Phase 2**: Multi-agent system with LangGraph  
+- [x] **Phase 3**: File processing pipeline
+- [x] **Phase 4**: RAG integration with Qdrant
+- [x] **Phase 5**: OpenAI integration (GPT-4o + embeddings)
 
-## 🛠️ Technology Stack
-
-- **Backend**: FastAPI, LangChain, LangGraph
-- **LLM**: OpenAI GPT-4o (multi-modal)
-- **Vector DB**: ChromaDB
-- **Embeddings**: OpenAI text-embedding-3-small
-- **Evaluation**: RAGAS
-- **Frontend**: Next.js (coming soon)
-
-## 📊 Expected Output
-
-When you upload the starter kit files, expect a summary like:
-
-> *"The KeyError in stack_trace.txt suggests a missing dictionary key during request processing. The CPU spike in cpu_spike.png indicates resource exhaustion around the same timeframe. The changes in bugfix.diff show recent modifications to error handling in the requests library. Based on historical analysis, similar incidents occurred in the GitLab postmortem from July 15th, involving KeyError exceptions during high load periods. Recommended next steps: Check request payload validation and increase resource limits."*
-
-## 🎯 Development Phases
-
-- [x] **Phase 1**: Project setup and starter kit
-- [ ] **Phase 2**: Basic FastAPI backend with file upload
-- [ ] **Phase 3**: Multi-modal agent pipeline with LangGraph
-- [ ] **Phase 4**: RAG integration with ChromaDB
-- [ ] **Phase 5**: Advanced retrieval techniques
+### 🔄 In Progress  
 - [ ] **Phase 6**: RAGAS evaluation pipeline
-- [ ] **Phase 7**: Next.js frontend
-- [ ] **Phase 8**: Production deployment
+- [ ] **Phase 7**: Frontend Next.js application
+- [ ] **Phase 8**: Advanced retrieval techniques
+- [ ] **Phase 9**: Production deployment
+
+## 🎮 Usage
+
+### API Endpoints
+
+#### Health Check
+```bash
+GET /health
+```
+
+#### Analyze Incident Files
+```bash
+POST /summarize
+Content-Type: multipart/form-data
+Files: logs, stack traces, diffs, etc.
+```
+
+#### Knowledge Base Stats
+```bash
+GET /knowledge-base/stats
+```
+
+## 🧪 Sample Data
+
+The project includes realistic sample incident files for testing:
+
+- **Postmortems**: Historical incident reports from major tech companies
+- **Log Files**: Java application logs with database connection errors
+- **Stack Traces**: HikariCP connection pool timeout exceptions
+- **Code Diffs**: Bug fixes showing resource leak corrections
+- **Metrics**: CPU/memory/database connection metrics during incidents
+
+## 🤖 Agent Architecture
+
+The system uses a 4-agent workflow powered by LangGraph:
+
+1. **Data Triage Agent**: Extracts key information from uploaded files
+2. **Historical Analyst Agent**: Searches for similar past incidents using RAG
+3. **Root Cause Analyzer**: Identifies likely failure causes with confidence scores
+4. **Synthesizer Agent**: Generates actionable recommendations and final summary
+
+## 📈 Performance & Evaluation
+
+- **RAGAS Metrics**: Faithfulness, Answer Relevancy, Context Recall, Context Precision
+- **Processing Time**: < 30 seconds for typical incident analysis
+- **Similarity Threshold**: 0.7 (configurable)
+- **Vector Dimensions**: 1536 (OpenAI text-embedding-3-small)
+
+## 🛠️ Development Notes
+
+### Project Architecture
+- **Async-first**: All I/O operations are asynchronous for performance
+- **Type Safety**: Full Pydantic model validation throughout
+- **Error Handling**: Comprehensive logging and graceful failure recovery
+- **Configuration**: Environment-based settings with .env support
+
+### Vector Database
+- **Engine**: Qdrant with cosine similarity
+- **Batch Processing**: 100 documents per batch for efficient indexing
+- **Collection Management**: Automatic creation with proper vector configuration
+
+### LLM Integration
+- **Model**: GPT-4o with 4000 token limit
+- **Temperature**: 0.1 for consistent, focused responses
+- **Prompts**: Role-specific system prompts for each agent
+
+## 🚀 Getting Started
+
+1. **Clone and setup**:
+   ```bash
+   git clone <repo-url>
+   cd oncall-lens/backend
+   python -m venv venv && source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+
+2. **Configure environment**:
+   ```bash
+   cp .env.template .env
+   # Add your OpenAI API key to .env
+   ```
+
+3. **Start Qdrant**:
+   ```bash
+   docker run -p 6333:6333 qdrant/qdrant
+   ```
+
+4. **Run the backend**:
+   ```bash
+   uvicorn main:app --reload
+   ```
+
+5. **Test with sample data**:
+   - Visit `http://localhost:8000/docs`
+   - Upload files from `data/sample-incident-1/`
+   - Get AI-powered incident analysis!
 
 ## 📝 License
 
-MIT License - See LICENSE file for details
+This project is part of the AI Engineering certification challenge.
+
+---
+
+**Built with ❤️ for on-call engineers everywhere** 🚀
