@@ -263,11 +263,14 @@ class AgentService:
                 ("system", """You are a senior SRE analyzing incident files. Create a concise technical summary 
                 focusing on the key symptoms, timeline, and immediate evidence. Be specific about error messages, 
                 system components, and failure patterns."""),
-                ("human", f"Analyze these incident files:\n\n{file_summary}\n\nExtracted errors: {errors}")
+                ("human", "Analyze these incident files:\n\n{file_summary}\n\nExtracted errors: {errors}")
             ])
             
             chain = prompt | self.llm
-            response = await chain.ainvoke({})
+            response = await chain.ainvoke({
+                "file_summary": file_summary,
+                "errors": str(errors)
+            })
             
             state["incident_summary"] = response.content
             state["extracted_errors"] = errors
@@ -347,18 +350,22 @@ class AgentService:
                 4. Supporting evidence
                 
                 Format as JSON array of objects with keys: category, description, confidence, evidence."""),
-                ("human", f"""Current incident: {incident_summary}
-                
-                Extracted errors: {errors}
-                
-                Historical context from similar incidents:
-                {historical_context}
-                
-                Identify the most likely root causes:""")
+                ("human", """Current incident: {incident_summary}
+
+Extracted errors: {errors}
+
+Historical context from similar incidents:
+{historical_context}
+
+Identify the most likely root causes:""")
             ])
             
             chain = prompt | self.llm
-            response = await chain.ainvoke({})
+            response = await chain.ainvoke({
+                "incident_summary": incident_summary,
+                "errors": str(errors),
+                "historical_context": historical_context
+            })
             
             # Parse root causes (simplified parsing for now)
             root_causes = self._parse_root_causes(response.content)
@@ -392,15 +399,18 @@ class AgentService:
                 
                 Format as JSON array with keys: priority (P0/P1/P2), category (immediate/short-term/long-term), 
                 action, rationale."""),
-                ("human", f"""Incident: {incident_summary}
-                
-                Root causes: {root_causes}
-                
-                Provide actionable recommendations:""")
+                ("human", """Incident: {incident_summary}
+
+Root causes: {root_causes}
+
+Provide actionable recommendations:""")
             ])
             
             chain = prompt | self.llm
-            response = await chain.ainvoke({})
+            response = await chain.ainvoke({
+                "incident_summary": incident_summary,
+                "root_causes": str(root_causes)
+            })
             
             # Parse recommendations
             recommendations = self._parse_recommendations(response.content)
