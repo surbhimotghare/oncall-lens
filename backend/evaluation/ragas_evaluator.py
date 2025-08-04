@@ -188,23 +188,43 @@ class RAGASEvaluator:
         
         # Extract scores
         scores = {}
-        for metric_name, score in result.items():
-            if isinstance(score, (int, float)):
-                scores[metric_name] = round(float(score), 3)
-            elif hasattr(score, 'mean'):
-                scores[metric_name] = round(float(score.mean()), 3)
-            elif hasattr(score, 'score'):
-                scores[metric_name] = round(float(score.score), 3)
-            else:
-                # Handle EvaluationResult object
-                try:
+        
+        # Handle different result formats
+        if hasattr(result, 'items'):
+            # Dictionary-like result
+            for metric_name, score in result.items():
+                if isinstance(score, (int, float)):
                     scores[metric_name] = round(float(score), 3)
-                except (TypeError, ValueError):
-                    # If we can't convert, try to get the score attribute
-                    if hasattr(score, 'score'):
-                        scores[metric_name] = round(float(score.score), 3)
+                elif hasattr(score, 'mean'):
+                    scores[metric_name] = round(float(score.mean()), 3)
+                elif hasattr(score, 'score'):
+                    scores[metric_name] = round(float(score.score), 3)
+                else:
+                    scores[metric_name] = 0.0
+        elif hasattr(result, '_scores_dict'):
+            # Use the _scores_dict which contains the actual scores
+            for metric_name, score_list in result._scores_dict.items():
+                if score_list and len(score_list) > 0:
+                    # Calculate mean of all scores for this metric
+                    if isinstance(score_list[0], (int, float)):
+                        avg_score = sum(float(s) for s in score_list) / len(score_list)
+                        scores[metric_name] = round(avg_score, 3)
                     else:
                         scores[metric_name] = 0.0
+        else:
+            # EvaluationResult object - extract scores from attributes
+            for attr_name in dir(result):
+                if not attr_name.startswith('_') and not callable(getattr(result, attr_name)):
+                    try:
+                        score_value = getattr(result, attr_name)
+                        if isinstance(score_value, (int, float)):
+                            scores[attr_name] = round(float(score_value), 3)
+                        elif hasattr(score_value, 'score'):
+                            scores[attr_name] = round(float(score_value.score), 3)
+                        elif hasattr(score_value, 'mean'):
+                            scores[attr_name] = round(float(score_value.mean()), 3)
+                    except (TypeError, ValueError):
+                        continue
         
         logger.info("✅ RAGAS evaluation completed")
         return scores
