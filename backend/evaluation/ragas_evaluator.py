@@ -99,8 +99,7 @@ class RAGASEvaluator:
             mock_files = []  # No files, just the question as context
             
             result = await self.agent_service.analyze_incident(
-                processed_files=mock_files,
-                user_query=question
+                processed_files=mock_files
             )
             
             # Extract answer and contexts from result
@@ -194,6 +193,18 @@ class RAGASEvaluator:
                 scores[metric_name] = round(float(score), 3)
             elif hasattr(score, 'mean'):
                 scores[metric_name] = round(float(score.mean()), 3)
+            elif hasattr(score, 'score'):
+                scores[metric_name] = round(float(score.score), 3)
+            else:
+                # Handle EvaluationResult object
+                try:
+                    scores[metric_name] = round(float(score), 3)
+                except (TypeError, ValueError):
+                    # If we can't convert, try to get the score attribute
+                    if hasattr(score, 'score'):
+                        scores[metric_name] = round(float(score.score), 3)
+                    else:
+                        scores[metric_name] = 0.0
         
         logger.info("✅ RAGAS evaluation completed")
         return scores

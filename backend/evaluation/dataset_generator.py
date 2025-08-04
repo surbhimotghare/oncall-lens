@@ -184,11 +184,22 @@ Generate a realistic question and answer based on this postmortem.""")
                 
                 try:
                     response = await self.llm.ainvoke(formatted_prompt)
-                    qa_data = self.parser.parse(response.content)
+                    parsed_data = self.parser.parse(response.content)
                     
-                    # Enhance the generated data
-                    qa_data.context = content[:2000]  # Use first 2000 chars as context
-                    qa_data.category = category
+                    # Create proper SyntheticQA object from parsed data
+                    if isinstance(parsed_data, dict):
+                        qa_data = SyntheticQA(
+                            question=parsed_data.get('question', ''),
+                            answer=parsed_data.get('answer', ''),
+                            ground_truth=parsed_data.get('ground_truth', ''),
+                            context=content[:2000],  # Use first 2000 chars as context
+                            category=category
+                        )
+                    else:
+                        # If it's already a Pydantic object
+                        qa_data = parsed_data
+                        qa_data.context = content[:2000]  # Use first 2000 chars as context
+                        qa_data.category = category
                     
                     synthetic_qas.append(qa_data)
                     
