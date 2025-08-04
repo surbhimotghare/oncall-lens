@@ -36,15 +36,18 @@ class Settings(BaseSettings):
     langsmith_api_key: Optional[str] = Field(default=None, description="LangSmith API key for tracing")
     langsmith_project: str = Field(default="oncall-lens", description="LangSmith project name")
     
-    # ChromaDB settings
-    chromadb_persist_directory: str = Field(
-        default="./chroma_db", 
-        description="Directory to persist ChromaDB data"
-    )
-    chromadb_collection_name: str = Field(
+    # Qdrant settings (replacing ChromaDB)
+    qdrant_host: str = Field(default="localhost", description="Qdrant server host")
+    qdrant_port: int = Field(default=6333, description="Qdrant server port")
+    qdrant_grpc_port: int = Field(default=6334, description="Qdrant gRPC port")
+    qdrant_api_key: Optional[str] = Field(default=None, description="Qdrant API key (for cloud)")
+    qdrant_https: bool = Field(default=False, description="Use HTTPS for Qdrant connection")
+    qdrant_collection_name: str = Field(
         default="oncall_postmortems", 
-        description="ChromaDB collection name"
+        description="Qdrant collection name for postmortems"
     )
+    qdrant_vector_size: int = Field(default=1536, description="Vector size for text-embedding-3-small")
+    qdrant_distance_metric: str = Field(default="Cosine", description="Distance metric for Qdrant vectors")
     
     # Data paths
     knowledge_base_path: str = Field(
@@ -138,9 +141,15 @@ ONCALL_DEBUG=false
 ONCALL_API_HOST=0.0.0.0
 ONCALL_API_PORT=8000
 
-# Database Configuration
-ONCALL_CHROMADB_PERSIST_DIRECTORY=./chroma_db
-ONCALL_CHROMADB_COLLECTION_NAME=oncall_postmortems
+# Qdrant Vector Database Configuration
+ONCALL_QDRANT_HOST=localhost
+ONCALL_QDRANT_PORT=6333
+ONCALL_QDRANT_GRPC_PORT=6334
+# ONCALL_QDRANT_API_KEY=your_qdrant_api_key_here  # For Qdrant Cloud
+ONCALL_QDRANT_HTTPS=false
+ONCALL_QDRANT_COLLECTION_NAME=oncall_postmortems
+ONCALL_QDRANT_VECTOR_SIZE=1536
+ONCALL_QDRANT_DISTANCE_METRIC=Cosine
 
 # File Processing Configuration
 ONCALL_MAX_FILE_SIZE_MB=50

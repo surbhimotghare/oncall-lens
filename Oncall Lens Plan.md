@@ -25,7 +25,7 @@ This document outlines the plan for building, evaluating, and improving an agent
     - **LLM:** OpenAI's `gpt-4o`. I chose this model for its strong reasoning capabilities across mixed data types and its multi-modal capacity to interpret screenshots.
     - **Embedding Model:** OpenAI's `text-embedding-3-small`. This provides a great starting balance of high performance and cost-efficiency for the prototype.
     - **Orchestration:** LangChain. I chose LangChain for its comprehensive ecosystem and robust tools for building and tracing complex, multi-step agentic workflows.
-    - **Vector Database:** ChromaDB. It's open-source and runs locally, making it ideal for rapid prototyping without infrastructure overhead.
+    - **Vector Database:** Qdrant. It's a high-performance vector database with excellent Python integration, making it ideal for production-grade RAG systems with fast similarity search.
     - **Monitoring:** LangSmith. I selected LangSmith because its tight integration with LangChain offers unparalleled visibility for debugging agent behavior and evaluating performance.
     - **Evaluation:** RAGAS. This is the specified framework, and it provides the key, interpretable metrics needed to quantitatively assess a RAG pipeline's performance.
     - **User Interface:** **Next.js**. I chose Next.js because it is a production-grade React framework that enables the creation of fast, SEO-friendly, and highly interactive web applications. Its component-based architecture will make the UI modular and easy to maintain, and it has first-class deployment support on Vercel.
@@ -49,7 +49,7 @@ My plan is to build a decoupled frontend and backend that communicate via a REST
 
 **1. Backend Development (FastAPI)**
 
-- **Setup:** Initialize a Python project with a virtual environment and install dependencies (`fastapi`, `uvicorn`, `langchain`, `openai`, `chromadb`, etc.). Enable CORS middleware to allow requests from the frontend during local development.
+- **Setup:** Initialize a Python project with a virtual environment and install dependencies (`fastapi`, `uvicorn`, `langchain`, `openai`, `qdrant-client`, etc.). Enable CORS middleware to allow requests from the frontend during local development.
 - **API Endpoints:** Create a `main.py`. Define a primary API endpoint, such as `/summarize`. This endpoint will be designed to accept file uploads (e.g., `.log`, `.png`).
 - **Agent Logic:** Inside the `/summarize` endpoint, the FastAPI function will receive the uploaded files, trigger the LangChain agent to perform the analysis and RAG, and receive the final summary.
 - **Data Contract:** The endpoint will return a JSON object containing the summary, sources, or any errors. Example: `{ "summary": "...", "confidence_score": 0.95 }`.
@@ -191,7 +191,7 @@ Here is a plausible multi-agent architecture for your **Oncall Incident Summariz
     - **Function:** This agent receives the raw files (`.log`, `.diff`, `.png`) from the Manager. It uses specific tools to parse the logs, extract code from diffs, and perform OCR on the screenshots. Its output is clean, structured text and data that other agents can easily use.
 3. **The Historical Analyst Agent (The RAG Specialist):**
     - **Role:** The internal knowledge expert.
-    - **Function:** **This is where your RAG pipeline lives.** The Manager tasks this agent with finding historical context. It takes the structured data from the Triage Agent, formulates queries, and interacts deeply with the ChromaDB vector store of past incidents. Its deliverable is a summary of similar past incidents, their root causes, and their resolutions.
+    - **Function:** **This is where your RAG pipeline lives.** The Manager tasks this agent with finding historical context. It takes the structured data from the Triage Agent, formulates queries, and interacts deeply with the Qdrant vector store of past incidents. Its deliverable is a summary of similar past incidents, their root causes, and their resolutions.
 4. **The External Researcher Agent:**
     - **Role:** The public internet specialist.
     - **Function:** If the Triage Agent extracts a specific error code (e.g., `PGRST-1138`) or a public library name, the Manager can delegate a task to this agent. It uses the Tavily Search API to find public documentation, GitHub issues, or Stack Overflow posts related to that error.
@@ -228,7 +228,7 @@ graph TD
     subgraph "AI Core (Managed by Backend)"
         Agent[🤖 LangChain Agent]
         LLM[🧠 LLM: gpt-4o]
-        VDB[(🗄️ ChromaDB<br>Vector Store)]
+        VDB[(🗄️ Qdrant<br>Vector Store)]
         APIs(📡 External APIs<br>e.g., Tavily)
     end
 
