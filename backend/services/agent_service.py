@@ -112,44 +112,111 @@ class AgentService:
         Analyze incident files using the multi-agent system.
         
         Args:
-            processed_files: List of processed incident files
+            processed_files: List of processed files from the file processor
             
         Returns:
             IncidentAnalysisResult with complete analysis
         """
-        if not self.is_healthy():
-            raise RuntimeError("Agent service is not healthy")
+        if not self._initialized:
+            raise ValueError("Agent service not initialized")
         
         start_time = time.time()
-        logger.info(f"🔍 Starting incident analysis with {len(processed_files)} files")
         
         try:
             # Initialize state
-            initial_state: IncidentState = {
-                "processed_files": processed_files,
-                "incident_summary": "",
-                "extracted_errors": [],
-                "similar_incidents": [],
-                "root_causes": [],
-                "recommendations": [],
-                "confidence_score": 0.0,
-                "messages": []
-            }
+            state = IncidentState(
+                processed_files=processed_files,
+                incident_summary="",
+                extracted_errors=[],
+                similar_incidents=[],
+                root_causes=[],
+                recommendations=[],
+                confidence_score=0.0,
+                messages=[]
+            )
             
-            # Run the agent workflow
-            final_state = await self.agent_graph.ainvoke(initial_state)
+            # Run the agent graph
+            final_state = await self.agent_graph.ainvoke(state)
             
-            # Convert to result format
-            analysis_result = self._format_analysis_result(final_state)
+            # Format the result
+            result = self._format_analysis_result(final_state)
+            result.processing_time_ms = int((time.time() - start_time) * 1000)
             
-            processing_time = int((time.time() - start_time) * 1000)
-            analysis_result.processing_time_ms = processing_time
-            
-            logger.info(f"✅ Incident analysis completed in {processing_time}ms")
-            return analysis_result
+            return result
             
         except Exception as e:
-            logger.error(f"❌ Incident analysis failed: {e}")
+            logger.error(f"❌ Error during incident analysis: {e}")
+            raise
+
+    async def analyze_incident_with_progress(
+        self, 
+        processed_files: List[ProcessedFile], 
+        progress_callback
+    ) -> IncidentAnalysisResult:
+        """
+        Analyze incident files with real-time progress updates.
+        
+        Args:
+            processed_files: List of processed files from the file processor
+            progress_callback: Function to call with progress updates
+            
+        Returns:
+            IncidentAnalysisResult with complete analysis
+        """
+        if not self._initialized:
+            raise ValueError("Agent service not initialized")
+        
+        start_time = time.time()
+        
+        try:
+            # Initialize state
+            state = IncidentState(
+                processed_files=processed_files,
+                incident_summary="",
+                extracted_errors=[],
+                similar_incidents=[],
+                root_causes=[],
+                recommendations=[],
+                confidence_score=0.0,
+                messages=[]
+            )
+            
+            # Progress updates for each stage with delays
+            progress_callback("data_triage", "Analyzing uploaded files...", 35)
+            await asyncio.sleep(1)  # Add delay to see progress
+            state = await self._data_triage_agent(state)
+            progress_callback("data_triage", "File analysis complete", 45)
+            await asyncio.sleep(1)
+            
+            progress_callback("historical_search", "Searching for similar incidents...", 50)
+            await asyncio.sleep(1)
+            state = await self._historical_analyst_agent(state)
+            progress_callback("historical_search", f"Found {len(state['similar_incidents'])} similar incidents", 60)
+            await asyncio.sleep(1)
+            
+            progress_callback("root_cause", "Analyzing root causes...", 65)
+            await asyncio.sleep(1)
+            state = await self._root_cause_analyzer(state)
+            progress_callback("root_cause", f"Identified {len(state['root_causes'])} root causes", 75)
+            await asyncio.sleep(1)
+            
+            progress_callback("synthesis", "Generating final analysis...", 80)
+            await asyncio.sleep(1)
+            state = await self._synthesizer_agent(state)
+            progress_callback("synthesis", "Analysis synthesis complete", 90)
+            await asyncio.sleep(1)
+            
+            # Format the result
+            result = self._format_analysis_result(state)
+            result.processing_time_ms = int((time.time() - start_time) * 1000)
+            
+            progress_callback("complete", "Analysis completed successfully!", 100)
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Error during incident analysis: {e}")
+            progress_callback("error", f"Analysis failed: {str(e)}", 0)
             raise
     
     async def get_knowledge_base_stats(self) -> KnowledgeBaseStats:
