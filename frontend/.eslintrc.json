@@ -1,0 +1,11 @@
+{
+  "extends": ["next/core-web-vitals"],
+  "rules": {
+    "jsx-a11y/alt-text": ["error", {
+      "elements": ["img"],
+      "img": ["Image"]
+    }],
+    "react/no-unescaped-entities": "off",
+    "@typescript-eslint/no-explicit-any": "off"
+  }
+} 

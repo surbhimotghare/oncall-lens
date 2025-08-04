@@ -1,66 +1,63 @@
 # FastAPI and Web Framework
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-python-multipart==0.0.6
-python-jose[cryptography]==3.3.0
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+python-jose[cryptography]>=3.3.0
 
-# LangChain and AI
-langchain==0.1.0
-langchain-openai==0.0.2
-langchain-community==0.0.10
-langgraph==0.0.20
-langsmith==0.0.69
+# LangChain and AI - using more recent versions
+langchain>=0.1.0
+langchain-openai>=0.0.2
+langchain-community>=0.0.10
+langgraph>=0.0.20
+langsmith>=0.0.69
 
-# OpenAI
-openai==1.6.1
+# OpenAI - using latest compatible version
+openai>=1.6.1
 
-# Vector Database - Qdrant (replacing ChromaDB)
-qdrant-client==1.7.0
-langchain-qdrant==0.0.1
+# Vector Database - Qdrant (using available version)
+qdrant-client>=1.7.1
+langchain-qdrant>=0.0.1
 
 # Evaluation
-ragas==0.1.0
-datasets==2.15.0
+ragas>=0.1.0
+datasets>=2.15.0
 
 # Document Processing
-pypdf==3.17.4
-python-docx==1.1.0
-markdown==3.5.1
-beautifulsoup4==4.12.2
+pypdf>=3.17.4
+python-docx>=1.1.0
+markdown>=3.5.1
+beautifulsoup4>=4.12.2
 
 # Data Processing
-pandas==2.1.4
-numpy==1.25.2
+pandas>=2.1.4
+numpy>=1.25.2
 
 # Environment and Configuration  
-python-dotenv==1.0.0
-pydantic==2.5.2
-pydantic-settings==2.1.0
+python-dotenv>=1.0.0
+pydantic>=2.5.2
+pydantic-settings>=2.1.0
 
 # HTTP and Networking
-httpx==0.25.2
-requests==2.31.0
-aiofiles==23.2.1
+httpx>=0.25.2
+requests>=2.31.0
+aiofiles>=23.2.1
 
 # Logging and Monitoring
-structlog==23.2.0
-rich==13.7.0
+structlog>=23.2.0
+rich>=13.7.0
 
 # Testing
-pytest==7.4.3
-pytest-asyncio==0.21.1
-httpx==0.25.2
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
 
 # Development
-black==23.11.0
-isort==5.12.0
-mypy==1.7.1
+black>=23.11.0
+isort>=5.12.0
+mypy>=1.7.1
 
 # Database (if needed for metadata)
-sqlalchemy==2.0.23
-alembic==1.13.1
+sqlalchemy>=2.0.23
+alembic>=1.13.1
 
 # Utilities
-pathlib==1.0.1
-typing-extensions==4.8.0
-uuid==1.30
+typing-extensions>=4.8.0

@@ -1,0 +1,13 @@
+diff --git a/config/database.yaml b/config/database.yaml
+index 1234567..abcdefg 100644
+--- a/config/database.yaml
++++ b/config/database.yaml
+@@ -1,7 +1,7 @@
+ database:
+   host: db.internal.company.com
+   port: 5432
+-  max_connections: 50
++  max_connections: 10
+   timeout: 30000
+   retry_attempts: 3
+   pool_size: 20 
