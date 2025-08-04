@@ -9,11 +9,13 @@ It provides endpoints for uploading incident files and generating AI-powered sum
 import logging
 from contextlib import asynccontextmanager
 from typing import List, Optional
-
+import asyncio
 import uvicorn
 from fastapi import FastAPI, File, HTTPException, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.background import BackgroundTasks
+import json
 
 from models.api_models import (
     HealthResponse,
@@ -32,6 +34,32 @@ logger = logging.getLogger(__name__)
 # Global services
 agent_service: Optional[AgentService] = None
 file_processor: Optional[FileProcessor] = None
+
+# Progress tracking
+progress_tasks: dict = {}
+
+async def progress_stream(task_id: str):
+    """Stream progress updates for a specific task."""
+    while True:
+        if task_id in progress_tasks:
+            progress = progress_tasks[task_id]
+            yield f"data: {json.dumps(progress)}\n\n"
+            
+            if progress.get("completed", False):
+                del progress_tasks[task_id]
+                break
+        await asyncio.sleep(0.1)  # Check more frequently for real-time updates
+
+def update_progress(task_id: str, stage: str, message: str, percentage: int = 0, completed: bool = False):
+    """Update progress for a specific task."""
+    progress_tasks[task_id] = {
+        "task_id": task_id,
+        "stage": stage,
+        "message": message,
+        "percentage": percentage,
+        "completed": completed,
+        "timestamp": asyncio.get_event_loop().time()
+    }
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -101,21 +129,38 @@ async def health_check():
     )
 
 
-@app.post("/summarize", response_model=IncidentSummaryResponse)
+@app.get("/progress/{task_id}")
+async def get_progress(task_id: str):
+    """
+    Server-Sent Events endpoint for real-time progress updates.
+    """
+    return StreamingResponse(
+        progress_stream(task_id),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "Cache-Control"
+        }
+    )
+
+@app.post("/summarize")
 async def create_incident_summary(
+    background_tasks: BackgroundTasks,
     files: List[UploadFile] = File(..., description="Incident files (logs, diffs, screenshots, etc.)")
 ):
     """
     Main endpoint for incident analysis.
     
-    Accepts multiple files related to an incident and returns an AI-generated summary
-    with historical context and actionable recommendations.
+    Returns immediately with a task_id, then runs analysis in background.
+    Use the /progress/{task_id} endpoint to track progress.
     
     Args:
         files: List of uploaded files (logs, stack traces, diffs, screenshots, etc.)
         
     Returns:
-        IncidentSummaryResponse with analysis results
+        Task ID for tracking progress
     """
     if not files:
         raise HTTPException(
@@ -129,40 +174,77 @@ async def create_incident_summary(
             detail="Agent service not available. Please try again later."
         )
     
+    # Generate task ID for progress tracking
+    import uuid
+    task_id = str(uuid.uuid4())
+    
+    logger.info(f"📁 Starting background analysis for {len(files)} files, task_id: {task_id}")
+    
+    # Initialize progress
+    update_progress(task_id, "start", "Analysis request received...", 0)
+    
+    # Start background analysis
+    background_tasks.add_task(run_analysis_background, task_id, files)
+    
+    # Return immediately with task_id
+    return {"task_id": task_id, "status": "started"}
+
+async def run_analysis_background(task_id: str, files: List[UploadFile]):
+    """Run the analysis in the background with progress updates."""
     try:
-        logger.info(f"📁 Processing {len(files)} files for incident analysis")
+        update_progress(task_id, "start", "Starting incident analysis...", 5)
         
         # Process uploaded files
+        update_progress(task_id, "processing", "Processing uploaded files...", 15)
         processed_files = await file_processor.process_files(files)
+        update_progress(task_id, "processing", f"Processed {len(processed_files)} files", 25)
         
-        # Run agent analysis
-        summary_result = await agent_service.analyze_incident(processed_files)
+        # Run agent analysis with progress updates
+        update_progress(task_id, "analysis", "Initializing AI analysis...", 30)
         
-        logger.info("✅ Incident analysis completed successfully")
+        # Create progress callback for agent service
+        def progress_callback(stage: str, message: str, percentage: int):
+            update_progress(task_id, stage, message, percentage)
         
-        return IncidentSummaryResponse(
-            summary=summary_result.summary,
-            confidence_score=summary_result.confidence_score,
-            root_causes=summary_result.root_causes,
-            similar_incidents=summary_result.similar_incidents,
-            recommendations=summary_result.recommendations,
-            processing_time_ms=summary_result.processing_time_ms,
-            files_processed=len(files)
+        summary_result = await agent_service.analyze_incident_with_progress(
+            processed_files, progress_callback
         )
         
-    except ValueError as e:
-        logger.error(f"❌ Validation error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        # Store the final result in progress_tasks for retrieval
+        progress_tasks[task_id + "_result"] = {
+            "summary": summary_result.summary,
+            "confidence_score": summary_result.confidence_score,
+            "root_causes": [rc.dict() for rc in summary_result.root_causes],
+            "similar_incidents": [si.dict() for si in summary_result.similar_incidents],
+            "recommendations": [r.dict() for r in summary_result.recommendations],
+            "processing_time_ms": summary_result.processing_time_ms,
+            "files_processed": len(files)
+        }
+        
+        update_progress(task_id, "complete", "Analysis completed successfully!", 100, completed=True)
+        logger.info("✅ Background incident analysis completed successfully")
+        
     except Exception as e:
-        logger.error(f"❌ Unexpected error during incident analysis: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error occurred during analysis"
-        )
+        logger.error(f"❌ Background analysis failed: {e}")
+        update_progress(task_id, "error", f"Analysis failed: {str(e)}", 0, completed=True)
 
+
+@app.get("/results/{task_id}")
+async def get_analysis_results(task_id: str):
+    """
+    Get the final analysis results for a completed task.
+    """
+    result_key = task_id + "_result"
+    
+    if result_key in progress_tasks:
+        result = progress_tasks[result_key]
+        del progress_tasks[result_key]  # Clean up after retrieval
+        return result
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Results not found. Task may not be completed yet."
+        )
 
 @app.get("/knowledge-base/stats")
 async def get_knowledge_base_stats():
