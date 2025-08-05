@@ -27,8 +27,8 @@ class FileProcessor:
     
     def __init__(self):
         self.settings = get_settings()
-        self.max_file_size = self.settings.max_file_size_mb * 1024 * 1024  # Convert to bytes
-        self.supported_extensions = set(self.settings.supported_file_types)
+        self.max_file_size = self.settings.max_file_size  # Already in bytes
+        self.supported_extensions = set(self.settings.allowed_file_types)
         
     async def process_files(self, files: List[UploadFile]) -> List[ProcessedFile]:
         """

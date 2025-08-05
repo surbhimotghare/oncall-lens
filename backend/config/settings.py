@@ -49,6 +49,8 @@ class Settings(BaseSettings):
         default="oncall_postmortems", 
         description="Qdrant collection name for postmortems"
     )
+    qdrant_vector_size: int = Field(default=1536, description="Vector size for embeddings")
+    qdrant_distance_metric: str = Field(default="Cosine", description="Distance metric for vector similarity")
     
     # Data paths
     knowledge_base_path: str = Field(
