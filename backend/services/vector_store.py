@@ -70,6 +70,20 @@ class QdrantVectorStore:
             logger.error(f"❌ Failed to initialize Qdrant vector store: {e}")
             raise
     
+    async def update_embeddings_api_key(self, openai_api_key: str) -> None:
+        """
+        Update the OpenAI API key for embeddings dynamically.
+        
+        Args:
+            openai_api_key: New OpenAI API key to use
+        """
+        logger.info("🔄 Updating embeddings with new OpenAI API key")
+        self.embeddings = OpenAIEmbeddings(
+            openai_api_key=openai_api_key,
+            model=self.settings.openai_embedding_model
+        )
+        logger.info("✅ Embeddings API key updated successfully")
+
     async def _ensure_collection_exists(self) -> None:
         """
         Ensure the collection exists with proper configuration.

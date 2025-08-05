@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from typing import List, Optional
 import asyncio
 import uvicorn
-from fastapi import FastAPI, File, HTTPException, UploadFile, status
+from fastapi import FastAPI, File, HTTPException, UploadFile, status, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.background import BackgroundTasks
@@ -21,7 +21,8 @@ from models.api_models import (
     HealthResponse,
     IncidentSummaryRequest,
     IncidentSummaryResponse,
-    ErrorResponse
+    ErrorResponse,
+    ProcessedFile
 )
 from services.agent_service import AgentService
 from services.file_processor import FileProcessor
@@ -148,16 +149,24 @@ async def get_progress(task_id: str):
 @app.post("/summarize")
 async def create_incident_summary(
     background_tasks: BackgroundTasks,
-    files: List[UploadFile] = File(..., description="Incident files (logs, diffs, screenshots, etc.)")
+    files: List[UploadFile] = File(..., description="Incident files (logs, diffs, screenshots, etc.)"),
+    openai_api_key: Optional[str] = Form(None, description="OpenAI API key from frontend"),
+    cohere_api_key: Optional[str] = Form(None, description="Cohere API key from frontend")
 ):
     """
     Main endpoint for incident analysis.
+    
+    Supports hybrid API key configuration:
+    - API keys can be provided via frontend (openai_api_key, cohere_api_key parameters)
+    - Falls back to server environment variables if not provided
     
     Returns immediately with a task_id, then runs analysis in background.
     Use the /progress/{task_id} endpoint to track progress.
     
     Args:
         files: List of uploaded files (logs, stack traces, diffs, screenshots, etc.)
+        openai_api_key: Optional OpenAI API key from frontend
+        cohere_api_key: Optional Cohere API key from frontend
         
     Returns:
         Task ID for tracking progress
@@ -174,32 +183,53 @@ async def create_incident_summary(
             detail="Agent service not available. Please try again later."
         )
     
+    # Validate API keys - check both frontend and backend sources
+    settings = get_settings()
+    final_openai_key = openai_api_key or settings.openai_api_key
+    
+    if not final_openai_key:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="OpenAI API key is required. Please provide it via the frontend settings or configure it on the server."
+        )
+    
+    # Process files immediately before background task (to avoid file handle closure)
+    logger.info(f"📁 Processing {len(files)} files before background analysis")
+    try:
+        processed_files = await file_processor.process_files(files)
+        logger.info(f"✅ Successfully processed {len(processed_files)} files")
+    except Exception as e:
+        logger.error(f"❌ Failed to process files: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to process uploaded files: {str(e)}"
+        )
+    
     # Generate task ID for progress tracking
     import uuid
     task_id = str(uuid.uuid4())
     
-    logger.info(f"📁 Starting background analysis for {len(files)} files, task_id: {task_id}")
+    logger.info(f"📁 Starting background analysis for {len(processed_files)} processed files, task_id: {task_id}")
+    logger.info(f"🔑 Using API key source: {'frontend' if openai_api_key else 'server environment'}")
     
     # Initialize progress
     update_progress(task_id, "start", "Analysis request received...", 0)
     
-    # Start background analysis
-    background_tasks.add_task(run_analysis_background, task_id, files)
+    # Start background analysis with processed files and API keys
+    background_tasks.add_task(run_analysis_background, task_id, processed_files, final_openai_key, cohere_api_key or settings.cohere_api_key)
     
     # Return immediately with task_id
     return {"task_id": task_id, "status": "started"}
 
-async def run_analysis_background(task_id: str, files: List[UploadFile]):
+async def run_analysis_background(task_id: str, processed_files: List[ProcessedFile], openai_api_key: Optional[str] = None, cohere_api_key: Optional[str] = None):
     """Run the analysis in the background with progress updates."""
     try:
         update_progress(task_id, "start", "Starting incident analysis...", 5)
         
-        # Process uploaded files
-        update_progress(task_id, "processing", "Processing uploaded files...", 15)
-        processed_files = await file_processor.process_files(files)
-        update_progress(task_id, "processing", f"Processed {len(processed_files)} files", 25)
+        # Files are already processed, so skip file processing step
+        update_progress(task_id, "processing", f"Using {len(processed_files)} processed files", 25)
         
-        # Run agent analysis with progress updates
+        # Run agent analysis with progress updates and dynamic API keys
         update_progress(task_id, "analysis", "Initializing AI analysis...", 30)
         
         # Create progress callback for agent service
@@ -207,7 +237,7 @@ async def run_analysis_background(task_id: str, files: List[UploadFile]):
             update_progress(task_id, stage, message, percentage)
         
         summary_result = await agent_service.analyze_incident_with_progress(
-            processed_files, progress_callback
+            processed_files, progress_callback, openai_api_key, cohere_api_key
         )
         
         # Store the final result in progress_tasks for retrieval
@@ -218,7 +248,7 @@ async def run_analysis_background(task_id: str, files: List[UploadFile]):
             "similar_incidents": [si.dict() for si in summary_result.similar_incidents],
             "recommendations": [r.dict() for r in summary_result.recommendations],
             "processing_time_ms": summary_result.processing_time_ms,
-            "files_processed": len(files)
+            "files_processed": len(processed_files)
         }
         
         update_progress(task_id, "complete", "Analysis completed successfully!", 100, completed=True)

@@ -13,14 +13,14 @@ class HealthResponse(BaseModel):
     status: str = Field(..., description="Service health status")
     message: str = Field(..., description="Human-readable status message")
     services: Dict[str, bool] = Field(..., description="Status of individual services")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
 
 
 class ErrorResponse(BaseModel):
     """Standard error response model."""
     error: str = Field(..., description="Error message")
     status_code: int = Field(..., description="HTTP status code")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
 
 
 class ProcessedFile(BaseModel):
@@ -86,26 +86,16 @@ class IncidentSummaryResponse(BaseModel):
     processing_time_ms: int = Field(..., description="Processing time in milliseconds")
     files_processed: int = Field(..., description="Number of files processed")
     task_id: Optional[str] = Field(None, description="Task ID for progress tracking")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
 
 
 class KnowledgeBaseStats(BaseModel):
     """Response model for knowledge base statistics."""
     total_postmortems: int = Field(..., description="Total number of postmortems in knowledge base")
     total_incidents: int = Field(..., description="Total number of incidents indexed")
-    last_updated: datetime = Field(..., description="When the knowledge base was last updated")
+    last_updated: str = Field(..., description="When the knowledge base was last updated")
     vector_store_size: int = Field(..., description="Number of vectors in the store")
     categories: Dict[str, int] = Field(..., description="Breakdown by incident categories")
-
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
 
 
 # Agent-specific models
@@ -115,7 +105,7 @@ class AgentMessage(BaseModel):
     agent_id: str = Field(..., description="ID of the sending agent")
     message_type: str = Field(..., description="Type of message")
     content: Dict[str, Any] = Field(..., description="Message content")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
 
 
 class AgentState(BaseModel):

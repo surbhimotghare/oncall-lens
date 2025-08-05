@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import FileUploader from '@/components/FileUploader';
 import AnalysisResult from '@/components/AnalysisResult';
-import { analyzeIncident, getAnalysisResults, subscribeToProgress, ProgressUpdate, ApiError } from '@/services/api';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Settings from '@/components/Settings';
+import { analyzeIncident, getAnalysisResults, subscribeToProgress, ProgressUpdate, ApiError, ApiKeys, hasFrontendApiKeysConfigured } from '@/services/api';
+import { ChevronLeft, ChevronRight, Settings as SettingsIcon } from 'lucide-react';
 
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
@@ -15,6 +16,7 @@ export default function Home() {
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
   const [progress, setProgress] = useState<ProgressUpdate | null>(null);
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleAnalyze = async () => {
     if (files.length === 0) return;
@@ -77,6 +79,15 @@ export default function Home() {
     }
   };
 
+  const handleSettingsSave = (apiKeys: ApiKeys) => {
+    // Clear any previous API key related errors
+    if (error && error.includes('API key')) {
+      setError(null);
+    }
+  };
+
+  const hasApiKeys = hasFrontendApiKeysConfigured();
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -94,10 +105,52 @@ export default function Home() {
                 <p className="text-xs text-muted">Incident Analyzer</p>
               </div>
             </div>
-            <div className="text-sm text-muted">AI-powered incident analysis</div>
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-muted">AI-powered incident analysis</div>
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className={`p-2.5 rounded-lg transition-all duration-200 ${
+                  hasApiKeys 
+                    ? 'text-gray-500 hover:text-gray-700 hover:bg-gray-100' 
+                    : 'text-white bg-amber-500 hover:bg-amber-600 shadow-lg animate-pulse hover:animate-none'
+                }`}
+                title="API Settings"
+              >
+                <SettingsIcon className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
       </header>
+
+      {/* API Key Warning Banner */}
+      {!hasApiKeys && (
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                    <SettingsIcon className="w-5 h-5 text-amber-600" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-amber-900">API Configuration Required</h3>
+                  <p className="text-sm text-amber-800">
+                    Please configure your OpenAI API key to enable AI-powered incident analysis.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
+              >
+                Configure Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -197,6 +250,13 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* Settings Modal */}
+      <Settings
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        onSave={handleSettingsSave}
+      />
     </div>
   );
 }

@@ -151,7 +151,9 @@ class AgentService:
     async def analyze_incident_with_progress(
         self, 
         processed_files: List[ProcessedFile], 
-        progress_callback
+        progress_callback,
+        openai_api_key: Optional[str] = None,
+        cohere_api_key: Optional[str] = None
     ) -> IncidentAnalysisResult:
         """
         Analyze incident files with real-time progress updates.
@@ -159,12 +161,28 @@ class AgentService:
         Args:
             processed_files: List of processed files from the file processor
             progress_callback: Function to call with progress updates
+            openai_api_key: Optional OpenAI API key to use for this analysis
+            cohere_api_key: Optional Cohere API key to use for this analysis
             
         Returns:
             IncidentAnalysisResult with complete analysis
         """
         if not self._initialized:
             raise ValueError("Agent service not initialized")
+        
+        # Update LLM with provided API key if available
+        if openai_api_key:
+            logger.info("🔄 Updating LLM with provided OpenAI API key")
+            self.llm = ChatOpenAI(
+                model=self.settings.openai_model,
+                temperature=self.settings.openai_temperature,
+                max_tokens=self.settings.openai_max_tokens,
+                api_key=openai_api_key
+            )
+            
+            # Also update the vector store embeddings if needed
+            if hasattr(self.vector_store, 'update_embeddings_api_key'):
+                await self.vector_store.update_embeddings_api_key(openai_api_key)
         
         start_time = time.time()
         
@@ -235,7 +253,7 @@ class AgentService:
             return KnowledgeBaseStats(
                 total_postmortems=3,  # Based on our sample data
                 total_incidents=15,   # Estimated from postmortems
-                last_updated=datetime.utcnow(),
+                last_updated=datetime.utcnow().isoformat(),
                 vector_store_size=collection_stats.get("vector_count", 0),
                 categories={
                     "Database Issues": 5,

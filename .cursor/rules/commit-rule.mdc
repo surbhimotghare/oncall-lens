@@ -4,3 +4,4 @@ globs:
 alwaysApply: true
 ---
 Do not use emojis in commit messages
+
