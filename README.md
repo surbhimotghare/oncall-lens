@@ -2,6 +2,8 @@
 
 An intelligent web application that acts as an expert assistant for on-call engineers during incident response. Upload incident artifacts (logs, stack traces, diffs, screenshots) and get AI-powered summaries with historical context using advanced retrieval techniques.
 
+> 📋 **Certification Challenge**: This project is part of the AI Engineering certification challenge. See [Certification-Challenge-Oncall-Lens.md](Certification-Challenge-Oncall-Lens.md) for detailed project planning, implementation progress, and evaluation results.
+
 ## 🏗️ Project Structure
 
 ```
@@ -22,7 +24,8 @@ oncall-lens/
 │       ├── knowledge-base/    # Historical postmortem files (.md)
 │       └── sample-incident-1/ # Test incident files
 ├── frontend/                  # Next.js frontend (coming soon)
-└── README.md                 # This file
+├── README.md                 # This file
+└── Certification-Challenge-Oncall-Lens.md  # Detailed project planning and results
 ```
 
 ## 🚀 Technology Stack
