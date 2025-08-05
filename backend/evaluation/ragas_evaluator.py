@@ -92,35 +92,71 @@ class RAGASEvaluator:
         return dataset
         
     async def run_rag_pipeline(self, question: str) -> Dict[str, Any]:
-        """Run the RAG pipeline on a single question."""
+        """Run the RAG pipeline on a single question using the real AgentService."""
         try:
-            # Use the agent service to get an answer
-            # This simulates an incident analysis with just a text question
-            mock_files = []  # No files, just the question as context
+            # Create a mock ProcessedFile with the question as content
+            # This simulates a user uploading a text file with their question
+            mock_file = {
+                "filename": "question.txt",
+                "file_type": "text/plain",
+                "content": question,
+                "size": len(question),
+                "metadata": {"source": "evaluation_question"}
+            }
             
-            result = await self.agent_service.analyze_incident(
-                processed_files=mock_files
+            # Convert to ProcessedFile format expected by AgentService
+            from models.api_models import ProcessedFile
+            processed_file = ProcessedFile(
+                filename="question.txt",
+                file_type="text/plain", 
+                content=question,
+                size_bytes=len(question),
+                processing_notes="Generated for RAGAS evaluation"
             )
             
-            # Extract answer and contexts from result
-            answer = result.summary if hasattr(result, 'summary') else str(result)
+            # Run the actual RAG pipeline
+            result = await self.agent_service.analyze_incident([processed_file])
             
-            # Get contexts from similar incidents found
+            # Extract answer from the result
+            if hasattr(result, 'summary'):
+                answer = result.summary
+            elif hasattr(result, 'incident_summary'):
+                answer = result.incident_summary
+            else:
+                answer = str(result)
+            
+            # Extract contexts from similar incidents
             contexts = []
-            if hasattr(result, 'similar_incidents'):
+            if hasattr(result, 'similar_incidents') and result.similar_incidents:
                 for incident in result.similar_incidents[:3]:  # Top 3 contexts
                     if hasattr(incident, 'description'):
                         contexts.append(incident.description)
-                    elif isinstance(incident, dict) and 'description' in incident:
-                        contexts.append(incident['description'])
+                    elif hasattr(incident, 'content'):
+                        contexts.append(incident.content)
+                    elif isinstance(incident, dict):
+                        # Handle dict format
+                        if 'description' in incident:
+                            contexts.append(incident['description'])
+                        elif 'content' in incident:
+                            contexts.append(incident['content'])
+                        elif 'summary' in incident:
+                            contexts.append(incident['summary'])
             
             # If no contexts from similar incidents, query vector store directly
+            if not contexts and self.vector_store:
+                try:
+                    search_results = await self.vector_store.similarity_search(
+                        query=question,
+                        top_k=3
+                    )
+                    contexts = [doc["content"] for doc in search_results]
+                except Exception as e:
+                    logger.warning(f"Direct vector store query failed: {e}")
+                    contexts = ["Unable to retrieve context from vector store"]
+            
+            # Ensure we have at least some context
             if not contexts:
-                search_results = await self.vector_store.similarity_search(
-                    query=question,
-                    k=3
-                )
-                contexts = [doc.page_content for doc in search_results]
+                contexts = ["No relevant context found for this question"]
             
             return {
                 "answer": answer,
