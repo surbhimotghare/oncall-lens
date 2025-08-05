@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     openai_max_tokens: int = Field(default=4000, description="Max tokens for OpenAI responses")
     openai_temperature: float = Field(default=0.1, description="Temperature for OpenAI responses")
     
+    # Cohere settings (optional, for advanced retrieval)
+    cohere_api_key: Optional[str] = Field(default=None, description="Cohere API key for reranking")
+    
     # LangSmith settings (optional)
     langsmith_api_key: Optional[str] = Field(default=None, description="LangSmith API key for tracing")
     langsmith_project: str = Field(default="oncall-lens", description="LangSmith project name")
@@ -46,64 +49,65 @@ class Settings(BaseSettings):
         default="oncall_postmortems", 
         description="Qdrant collection name for postmortems"
     )
-    qdrant_vector_size: int = Field(default=1536, description="Vector size for text-embedding-3-small")
-    qdrant_distance_metric: str = Field(default="Cosine", description="Distance metric for Qdrant vectors")
     
     # Data paths
     knowledge_base_path: str = Field(
         default="./data/knowledge-base",
-        description="Path to knowledge base files (postmortems)"
+        description="Path to the knowledge base directory"
     )
-    sample_data_path: str = Field(
-        default="./data/sample-incident-1",
-        description="Path to sample incident data"
-    )
-    
-    # File processing settings
-    max_file_size_mb: int = Field(default=50, description="Maximum file size in MB")
-    supported_file_types: List[str] = Field(
-        default=[".txt", ".log", ".md", ".diff", ".patch", ".json", ".csv", ".png", ".jpg", ".jpeg"],
-        description="Supported file extensions"
-    )
-    
-    # Agent settings
-    max_processing_time_seconds: int = Field(
-        default=300, 
-        description="Maximum processing time for incident analysis"
-    )
-    similarity_threshold: float = Field(
-        default=0.7, 
-        description="Similarity threshold for finding related incidents"
-    )
-    max_similar_incidents: int = Field(
-        default=5, 
-        description="Maximum number of similar incidents to return"
+    upload_path: str = Field(
+        default="./data/uploads",
+        description="Path to store uploaded files"
     )
     
     # RAG settings
-    chunk_size: int = Field(default=1000, description="Text chunk size for embeddings")
-    chunk_overlap: int = Field(default=200, description="Overlap between text chunks")
-    top_k_retrieval: int = Field(default=5, description="Number of chunks to retrieve")
+    chunk_size: int = Field(default=1500, description="Chunk size for document splitting")
+    chunk_overlap: int = Field(default=200, description="Overlap between chunks")
+    similarity_threshold: float = Field(default=0.5, description="Similarity threshold for retrieval")
+    max_docs_per_query: int = Field(default=5, description="Maximum documents to retrieve per query")
     
-    # RAGAS evaluation settings
-    ragas_metrics: List[str] = Field(
-        default=["answer_relevancy", "faithfulness", "context_recall", "context_precision"],
-        description="RAGAS metrics to use for evaluation"
-    )
+    # Agent settings
+    max_agent_iterations: int = Field(default=10, description="Maximum iterations for agent")
+    agent_timeout: int = Field(default=300, description="Agent timeout in seconds")
+    
+    # Evaluation settings
+    evaluation_dataset_size: int = Field(default=30, description="Size of evaluation dataset")
+    evaluation_batch_size: int = Field(default=5, description="Batch size for evaluation")
+    
+    # External API settings
+    tavily_api_key: Optional[str] = Field(default=None, description="Tavily Search API key")
     
     # Security settings
+    secret_key: str = Field(
+        default="dev-secret-key-change-in-production",
+        description="Secret key for JWT tokens"
+    )
+    access_token_expire_minutes: int = Field(
+        default=30,
+        description="Access token expiration in minutes"
+    )
+    
+    # CORS settings
     cors_origins: List[str] = Field(
-        default=["http://localhost:3000"], 
+        default=["http://localhost:3000", "http://localhost:8080"],
         description="Allowed CORS origins"
     )
     
     # Logging settings
     log_level: str = Field(default="INFO", description="Logging level")
-    log_format: str = Field(
-        default="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        description="Log format"
+    log_file: Optional[str] = Field(default=None, description="Log file path")
+    
+    # File upload settings
+    max_file_size: int = Field(default=10 * 1024 * 1024, description="Max file size in bytes (10MB)")
+    allowed_file_types: List[str] = Field(
+        default=[".txt", ".log", ".diff", ".png", ".jpg", ".jpeg", ".pdf"],
+        description="Allowed file extensions"
     )
     
+    # Rate limiting
+    rate_limit_requests: int = Field(default=100, description="Rate limit requests per minute")
+    rate_limit_window: int = Field(default=60, description="Rate limit window in seconds")
+
     class Config:
         env_file = ".env"
         env_prefix = "ONCALL_"
@@ -119,63 +123,68 @@ def get_settings() -> Settings:
     return Settings()
 
 
-def create_env_template():
+def get_settings_no_cache() -> Settings:
     """
-    Create a template .env file with all required environment variables.
-    Useful for setup and documentation.
+    Get application settings without caching.
+    Useful for testing when environment variables change dynamically.
     """
-    template = """# Oncall Lens Environment Variables
-# Copy this file to .env and fill in your values
+    return Settings()
 
-# OpenAI API Configuration (Required)
+
+def create_env_template():
+    """Create a template .env file with all available settings."""
+    template_content = """# Oncall Lens Environment Configuration
+
+# OpenAI Configuration (Required)
 ONCALL_OPENAI_API_KEY=your_openai_api_key_here
-ONCALL_OPENAI_MODEL=gpt-4o
-ONCALL_OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+
+# Cohere Configuration (For Advanced Retrieval)
+ONCALL_COHERE_API_KEY=your_cohere_api_key_here
 
 # LangSmith Configuration (Optional)
-# ONCALL_LANGSMITH_API_KEY=your_langsmith_api_key_here
-# ONCALL_LANGSMITH_PROJECT=oncall-lens
+ONCALL_LANGSMITH_API_KEY=your_langsmith_api_key_here
+ONCALL_LANGSMITH_PROJECT=oncall-lens
+
+# Qdrant Configuration
+ONCALL_QDRANT_HOST=localhost
+ONCALL_QDRANT_PORT=6333
+ONCALL_QDRANT_GRPC_PORT=6334
 
 # Application Configuration
+ONCALL_APP_NAME=Oncall Lens
 ONCALL_DEBUG=false
 ONCALL_API_HOST=0.0.0.0
 ONCALL_API_PORT=8000
 
-# Qdrant Vector Database Configuration
-ONCALL_QDRANT_HOST=localhost
-ONCALL_QDRANT_PORT=6333
-ONCALL_QDRANT_GRPC_PORT=6334
-# ONCALL_QDRANT_API_KEY=your_qdrant_api_key_here  # For Qdrant Cloud
-ONCALL_QDRANT_HTTPS=false
-ONCALL_QDRANT_COLLECTION_NAME=oncall_postmortems
-ONCALL_QDRANT_VECTOR_SIZE=1536
-ONCALL_QDRANT_DISTANCE_METRIC=Cosine
+# Data Paths
+ONCALL_KNOWLEDGE_BASE_PATH=./data/knowledge-base
+ONCALL_UPLOAD_PATH=./data/uploads
 
-# File Processing Configuration
-ONCALL_MAX_FILE_SIZE_MB=50
-
-# Agent Configuration
-ONCALL_MAX_PROCESSING_TIME_SECONDS=300
-ONCALL_SIMILARITY_THRESHOLD=0.7
-ONCALL_MAX_SIMILAR_INCIDENTS=5
-
-# RAG Configuration
-ONCALL_CHUNK_SIZE=1000
+# RAG Settings
+ONCALL_CHUNK_SIZE=1500
 ONCALL_CHUNK_OVERLAP=200
-ONCALL_TOP_K_RETRIEVAL=5
+ONCALL_SIMILARITY_THRESHOLD=0.5
+ONCALL_MAX_DOCS_PER_QUERY=5
 
-# Logging
-ONCALL_LOG_LEVEL=INFO
+# Security
+ONCALL_SECRET_KEY=change-me-in-production
+ONCALL_ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# File Upload
+ONCALL_MAX_FILE_SIZE=10485760
+ONCALL_ALLOWED_FILE_TYPES=[".txt",".log",".diff",".png",".jpg",".jpeg",".pdf"]
+
+# Rate Limiting
+ONCALL_RATE_LIMIT_REQUESTS=100
+ONCALL_RATE_LIMIT_WINDOW=60
 """
     
-    env_path = ".env.template"
-    with open(env_path, "w") as f:
-        f.write(template)
+    with open(".env.template", "w") as f:
+        f.write(template_content)
     
-    print(f"✅ Created environment template at {env_path}")
-    print("Copy this file to .env and fill in your values")
+    print("✅ Created .env.template file")
+    print("📝 Copy it to .env and fill in your API keys")
 
 
 if __name__ == "__main__":
-    # Create environment template when run directly
     create_env_template() 

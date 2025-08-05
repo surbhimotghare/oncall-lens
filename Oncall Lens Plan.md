@@ -100,11 +100,13 @@ This assessment provides a solid foundation for targeted improvements, with the 
 
 ### **Task 6: The Benefits of Advanced Retrieval**
 
-- **Planned Retrieval Techniques:** To address the weaknesses identified in Task 5, I will test several advanced retrieval techniques.
-    1. **Parent Document Retriever:** This technique retrieves smaller, specific chunks for semantic matching but provides the larger parent chunk (e.g., a whole section of a postmortem) to the LLM for better context. I believe this will be useful for providing the LLM with a more complete picture without sacrificing precision.
-    2. **Hybrid Search:** This combines keyword-based search (like BM25) with semantic vector search. I believe this will be essential for matching specific, literal strings like error codes or function names, which pure semantic search can sometimes miss.
-    3. **Multi-Query Retriever:** This uses an LLM to generate multiple variations of a user's query from different perspectives. I believe this will help uncover relevant documents that the original query phrasing might have missed, improving recall.
-- These techniques will be implemented and tested within the existing LangChain framework, replacing the naive retriever.
+- **Implemented and Tested Retrieval Techniques:** I successfully implemented and tested several advanced retrieval techniques to address the weaknesses identified in Task 5.
+    1. **Parent Document Retriever:** This technique retrieves smaller, specific chunks for semantic matching but provides the larger parent chunk (e.g., a whole section of a postmortem) to the LLM for better context. This is useful for providing the LLM with a more complete picture without sacrificing precision.
+    2. **Hybrid Search (BM25 + Semantic):** This combines keyword-based search (BM25) with semantic vector search using a 30%/70% weighting. This is essential for matching specific, literal strings like error codes or function names, which pure semantic search can sometimes miss.
+    3. **Multi-Query Retriever:** This uses an LLM to generate multiple variations of a user's query from different perspectives. This helps uncover relevant documents that the original query phrasing might have missed, improving recall.
+    4. **Contextual Compression (Cohere Reranking):** This technique uses Cohere's rerank model to reorder retrieved documents based on relevance to the query. This provides better precision by surfacing the most relevant results first.
+    5. **Ensemble Retriever:** This combines all the above strategies with equal weighting to maximize coverage and provide the most comprehensive retrieval results.
+- **Implementation Results:** All techniques were successfully implemented within the existing LangChain framework, replacing the naive retriever. The system now supports dynamic selection of retrieval strategies based on the specific use case, with the ensemble retriever providing the most comprehensive coverage for complex incident analysis queries.
 
 ### **Task 7: Assessing Performance**
 

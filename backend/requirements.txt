@@ -8,6 +8,8 @@ python-jose[cryptography]>=3.3.0
 langchain>=0.1.0
 langchain-openai>=0.0.2
 langchain-community>=0.0.10
+langchain-cohere>=0.1.0
+langchain-experimental>=0.0.50
 langgraph>=0.0.20
 langsmith>=0.0.69
 
@@ -17,6 +19,9 @@ openai>=1.6.1
 # Vector Database - Qdrant (using available version)
 qdrant-client>=1.7.1
 langchain-qdrant>=0.0.1
+
+# Advanced Retrieval
+rank_bm25>=0.2.2
 
 # Evaluation
 ragas>=0.1.0
