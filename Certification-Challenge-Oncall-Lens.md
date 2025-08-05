@@ -174,22 +174,22 @@ graph TD
     end
 
     %% --- Flows ---
-    User -- "Interacts with UI" --> Frontend
-    User -- "1. Uploads Incident Files" --> Uploads
-    Frontend -- "2. Sends API Request with Files" --> Backend
+    User -->|Interacts with UI| Frontend
+    User -->|Uploads Incident Files| Uploads
+    Frontend -->|Sends API Request| Backend
 
-    Backend -- "3. Invokes Agent" --> Agent
-    Agent -- "4. Gets Historical Context (RAG)" --> VDB
-    Agent -- "5. Gets External Info" --> APIs
-    Agent -- "6. Reasons & Synthesizes" --> LLM
+    Backend -->|Invokes Agent| Agent
+    Agent -->|Gets Historical Context| VDB
+    Agent -->|Gets External Info| APIs
+    Agent -->|Reasons & Synthesizes| LLM
 
-    LLM -- "Returns Final Analysis" --> Agent
-    Agent -- "Returns Final Analysis" --> Backend
-    Backend -- "7. Sends JSON Summary" --> Frontend
-    Frontend -- "8. Displays Summary" --> User
+    LLM -->|Returns Final Analysis| Agent
+    Agent -->|Returns Final Analysis| Backend
+    Backend -->|Sends JSON Summary| Frontend
+    Frontend -->|Displays Summary| User
 
     %% --- Data Ingestion (Offline Process) ---
-    KnowledgeBase -- "Ingested & Vectorized" --> VDB
+    KnowledgeBase -->|Ingested & Vectorized| VDB
 
     %% --- Styling ---
     style User fill:#D6EAF8,stroke:#333,stroke-width:2px
