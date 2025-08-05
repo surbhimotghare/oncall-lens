@@ -109,10 +109,10 @@ export default function Home() {
               <div className="text-sm text-muted">AI-powered incident analysis</div>
               <button
                 onClick={() => setIsSettingsOpen(true)}
-                className={`p-2 rounded-md transition-colors ${
+                className={`p-2.5 rounded-lg transition-all duration-200 ${
                   hasApiKeys 
-                    ? 'text-muted hover:text-foreground hover:bg-muted/50' 
-                    : 'text-amber-600 hover:text-amber-700 hover:bg-amber-50 animate-pulse'
+                    ? 'text-gray-500 hover:text-gray-700 hover:bg-gray-100' 
+                    : 'text-white bg-amber-500 hover:bg-amber-600 shadow-lg animate-pulse hover:animate-none'
                 }`}
                 title="API Settings"
               >
@@ -125,18 +125,25 @@ export default function Home() {
 
       {/* API Key Warning Banner */}
       {!hasApiKeys && (
-        <div className="bg-amber-50 border-b border-amber-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <SettingsIcon className="w-5 h-5 text-amber-600" />
-                <p className="text-sm text-amber-800">
-                  <strong>API Configuration Required:</strong> Please configure your OpenAI API key to enable analysis.
-                </p>
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                    <SettingsIcon className="w-5 h-5 text-amber-600" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-amber-900">API Configuration Required</h3>
+                  <p className="text-sm text-amber-800">
+                    Please configure your OpenAI API key to enable AI-powered incident analysis.
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setIsSettingsOpen(true)}
-                className="text-sm font-medium text-amber-600 hover:text-amber-700 underline"
+                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
               >
                 Configure Now
               </button>
