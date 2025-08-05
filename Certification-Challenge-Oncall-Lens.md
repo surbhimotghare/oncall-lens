@@ -2,6 +2,11 @@
 
 ---
 
+**Video Walkthrough**:
+https://www.loom.com/share/f2dcf2f058454671b75cb1eac34971c1?sid=5adfc55d-663a-4118-bc4c-d2a675ad35c9
+
+----
+
 This document outlines the plan for building, evaluating, and improving an agentic RAG application designed to assist on-call engineers during incident response.
 
 ### **Task 1: Defining your Problem and Audience**
@@ -41,11 +46,57 @@ This document outlines the plan for building, evaluating, and improving an agent
 - **Chunking Strategy:** I will start with a **RecursiveCharacterTextSplitter** that is sensitive to common programming syntax. For documents like logs and diffs, I will set separators like `\n\n`, `\n`, and function or class definitions to keep logical blocks of code or text together. This is superior to a simple fixed-size chunking strategy, which could sever a critical log entry or function definition, thereby destroying its semantic meaning and crippling the retrieval process.
 
 
-### **Task 4: Building a Quick End-to-End Prototype (Revised Plan)**
+### **Task 4: Building a Quick End-to-End Prototype**
 
-The plan is to build the backend API first, then the frontend to consume it.
+```mermaid
+graph TD
+    subgraph "User's Browser"
+        User(👤 User)
+        Frontend[🌐 Next.js Frontend]
+    end
 
-My plan is to build a decoupled frontend and backend that communicate via a REST API.
+    subgraph "Cloud Platform (e.g., Vercel)"
+        Backend[🚀 FastAPI Backend]
+    end
+
+    subgraph "AI Core (Managed by Backend)"
+        Agent[🤖 LangChain Agent]
+        LLM[🧠 LLM: gpt-4o]
+        VDB[(🗄️ Qdrant<br>Vector Store)]
+        APIs(📡 External APIs<br>e.g., Tavily)
+    end
+
+    subgraph "Data Sources"
+        Uploads(📄 User Files<br>logs, diffs, pngs)
+        KnowledgeBase(📚 Historical Postmortems)
+    end
+
+    %% --- Flows ---
+    User -->|Interacts with UI| Frontend
+    User -->|Uploads Incident Files| Uploads
+    Frontend -->|Sends API Request| Backend
+
+    Backend -->|Invokes Agent| Agent
+    Agent -->|Gets Historical Context| VDB
+    Agent -->|Gets External Info| APIs
+    Agent -->|Reasons & Synthesizes| LLM
+
+    LLM -->|Returns Final Analysis| Agent
+    Agent -->|Returns Final Analysis| Backend
+    Backend -->|Sends JSON Summary| Frontend
+    Frontend -->|Displays Summary| User
+
+    %% --- Data Ingestion (Offline Process) ---
+    KnowledgeBase -->|Ingested & Vectorized| VDB
+
+    %% --- Styling ---
+    style User fill:#D6EAF8,stroke:#333,stroke-width:2px
+    style Frontend fill:#AEB6BF,stroke:#333,stroke-width:2px
+    style Backend fill:#AED6F1,stroke:#333,stroke-width:2px
+    style Agent fill:#A9DFBF,stroke:#333,stroke-width:2px
+    style VDB fill:#F5B7B1,stroke:#333,stroke-width:2px
+```
+
 
 **1. Backend Development (FastAPI)**
 
@@ -152,51 +203,3 @@ In the second half of the course, I plan to focus on the following enhancements:
 
 ---
 
-```mermaid
-graph TD
-    subgraph "User's Browser"
-        User(👤 User)
-        Frontend[🌐 Next.js Frontend]
-    end
-
-    subgraph "Cloud Platform (e.g., Vercel)"
-        Backend[🚀 FastAPI Backend]
-    end
-
-    subgraph "AI Core (Managed by Backend)"
-        Agent[🤖 LangChain Agent]
-        LLM[🧠 LLM: gpt-4o]
-        VDB[(🗄️ Qdrant<br>Vector Store)]
-        APIs(📡 External APIs<br>e.g., Tavily)
-    end
-
-    subgraph "Data Sources"
-        Uploads(📄 User Files<br>logs, diffs, pngs)
-        KnowledgeBase(📚 Historical Postmortems)
-    end
-
-    %% --- Flows ---
-    User -->|Interacts with UI| Frontend
-    User -->|Uploads Incident Files| Uploads
-    Frontend -->|Sends API Request| Backend
-
-    Backend -->|Invokes Agent| Agent
-    Agent -->|Gets Historical Context| VDB
-    Agent -->|Gets External Info| APIs
-    Agent -->|Reasons & Synthesizes| LLM
-
-    LLM -->|Returns Final Analysis| Agent
-    Agent -->|Returns Final Analysis| Backend
-    Backend -->|Sends JSON Summary| Frontend
-    Frontend -->|Displays Summary| User
-
-    %% --- Data Ingestion (Offline Process) ---
-    KnowledgeBase -->|Ingested & Vectorized| VDB
-
-    %% --- Styling ---
-    style User fill:#D6EAF8,stroke:#333,stroke-width:2px
-    style Frontend fill:#AEB6BF,stroke:#333,stroke-width:2px
-    style Backend fill:#AED6F1,stroke:#333,stroke-width:2px
-    style Agent fill:#A9DFBF,stroke:#333,stroke-width:2px
-    style VDB fill:#F5B7B1,stroke:#333,stroke-width:2px
-```
