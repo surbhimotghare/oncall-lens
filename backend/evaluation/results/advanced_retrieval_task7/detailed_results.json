@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "run_name": "advanced_retrieval_task7",
+    "timestamp": "2025-08-04T22:37:57.645163",
+    "strategies_tested": [
+      "naive",
+      "parent_document",
+      "hybrid",
+      "multi_query",
+      "compression",
+      "ensemble"
+    ],
+    "baseline_comparison": true
+  },
+  "baseline_scores": {
+    "faithfulness": 0.267,
+    "answer_relevancy": 0.518,
+    "context_precision": 0.75,
+    "context_recall": 0.833,
+    "semantic_similarity": 0.437,
+    "answer_correctness": 0.163
+  },
+  "strategy_results": {
+    "naive": {
+      "error": "'str' object has no attribute 'get'"
+    },
+    "parent_document": {
+      "error": "'str' object has no attribute 'get'"
+    },
+    "hybrid": {
+      "error": "'str' object has no attribute 'get'"
+    },
+    "multi_query": {
+      "error": "'str' object has no attribute 'get'"
+    },
+    "compression": {
+      "error": "'str' object has no attribute 'get'"
+    },
+    "ensemble": {
+      "error": "'str' object has no attribute 'get'"
+    }
+  },
+  "improvements": {}
+}
