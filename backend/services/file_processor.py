@@ -43,14 +43,20 @@ class FileProcessor:
         processed_files = []
         
         for file in files:
+            logger.info(f"🔍 Processing file: {file.filename}")
             try:
                 processed_file = await self._process_single_file(file)
                 processed_files.append(processed_file)
-                logger.info(f"✅ Processed file: {file.filename} ({processed_file.file_type})")
+                logger.info(f"✅ Successfully processed file: {file.filename} ({processed_file.file_type})")
+                
+            except HTTPException as e:
+                logger.error(f"❌ HTTP error processing file {file.filename}: {e.detail}")
+                # For HTTP exceptions, we want to fail fast rather than continue
+                raise e
                 
             except Exception as e:
-                logger.error(f"❌ Failed to process file {file.filename}: {e}")
-                # Continue processing other files, but note the failure
+                logger.error(f"❌ Unexpected error processing file {file.filename}: {type(e).__name__}: {e}")
+                # For unexpected errors, create an error file but continue processing others
                 processed_files.append(ProcessedFile(
                     filename=file.filename or "unknown",
                     file_type="error",
@@ -71,26 +77,61 @@ class FileProcessor:
         Returns:
             ProcessedFile with extracted content
         """
-        # Validate file
-        await self._validate_file(file)
+        logger.info(f"🔍 Starting to process file: {file.filename}")
         
-        # Read file content
-        content = await file.read()
-        file_size = len(content)
-        
-        # Determine file type and process accordingly
-        file_type = self._determine_file_type(file.filename, content)
-        
-        # Extract text content based on file type
-        text_content = await self._extract_content(content, file_type, file.filename)
-        
-        return ProcessedFile(
-            filename=file.filename or "unknown",
-            file_type=file_type,
-            content=text_content,
-            size_bytes=file_size,
-            processing_notes=f"Successfully processed as {file_type}"
-        )
+        try:
+            # Validate file
+            await self._validate_file(file)
+            logger.info(f"🔍 File validation passed for: {file.filename}")
+            
+            # Reset file pointer to beginning and read content
+            await file.seek(0)
+            logger.info(f"🔍 File pointer reset for: {file.filename}")
+            
+            # Read file content
+            content = await file.read()
+            file_size = len(content)
+            logger.info(f"🔍 File read - {file.filename}: size={file_size} bytes")
+            
+            # Validate file size and content
+            if file_size == 0:
+                logger.error(f"🔍 File is empty: {file.filename}")
+                raise HTTPException(status_code=400, detail="File is empty")
+            
+            if file_size > self.max_file_size:
+                logger.error(f"🔍 File too large: {file.filename} - {file_size} bytes")
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"File too large: {file_size} bytes. Maximum allowed: {self.max_file_size} bytes"
+                )
+            
+            # Debug logging - show actual content preview
+            content_preview = content[:200] if isinstance(content, bytes) else str(content)[:200]
+            logger.info(f"🔍 File content preview - {file.filename}: {content_preview}")
+            
+            # Determine file type and process accordingly
+            file_type = self._determine_file_type(file.filename, content)
+            logger.info(f"🔍 Determined file type: {file_type} for {file.filename}")
+            
+            # Extract text content based on file type
+            text_content = await self._extract_content(content, file_type, file.filename)
+            logger.info(f"🔍 Extracted content length: {len(text_content)} chars, type: {file_type}")
+            
+            return ProcessedFile(
+                filename=file.filename or "unknown",
+                file_type=file_type,
+                content=text_content,
+                size_bytes=file_size,
+                processing_notes=f"Successfully processed as {file_type}"
+            )
+            
+        except HTTPException:
+            # Re-raise HTTP exceptions
+            raise
+        except Exception as e:
+            logger.error(f"🔍 Unexpected error processing {file.filename}: {type(e).__name__}: {e}")
+            logger.error(f"🔍 File state - filename: {file.filename}, content_type: {getattr(file, 'content_type', 'unknown')}")
+            raise HTTPException(status_code=500, detail=f"Failed to process file: {str(e)}")
     
     async def _validate_file(self, file: UploadFile) -> None:
         """
@@ -113,13 +154,8 @@ class FileProcessor:
                 detail=f"Unsupported file type: {file_ext}. Supported types: {self.supported_extensions}"
             )
         
-        # Check file size (read first chunk to estimate)
-        await file.seek(0)
-        chunk = await file.read(1024)
-        await file.seek(0)
-        
-        if not chunk:
-            raise HTTPException(status_code=400, detail="File is empty")
+        # Don't read the file here - just check if we can access it
+        # The actual size validation will happen after we read the full content
     
     def _determine_file_type(self, filename: str, content: bytes) -> str:
         """
@@ -208,6 +244,9 @@ class FileProcessor:
         Returns:
             Decoded text string
         """
+        if not content:
+            return ""
+            
         encodings = ['utf-8', 'utf-16', 'iso-8859-1', 'cp1252']
         
         for encoding in encodings:

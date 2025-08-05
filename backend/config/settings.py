@@ -67,6 +67,8 @@ class Settings(BaseSettings):
     chunk_overlap: int = Field(default=200, description="Overlap between chunks")
     similarity_threshold: float = Field(default=0.5, description="Similarity threshold for retrieval")
     max_docs_per_query: int = Field(default=5, description="Maximum documents to retrieve per query")
+    max_similar_incidents: int = Field(default=5, description="Maximum similar incidents to retrieve")
+    top_k_retrieval: int = Field(default=5, description="Top K documents for retrieval")
     
     # Agent settings
     max_agent_iterations: int = Field(default=10, description="Maximum iterations for agent")

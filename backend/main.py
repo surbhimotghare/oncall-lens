@@ -21,7 +21,8 @@ from models.api_models import (
     HealthResponse,
     IncidentSummaryRequest,
     IncidentSummaryResponse,
-    ErrorResponse
+    ErrorResponse,
+    ProcessedFile
 )
 from services.agent_service import AgentService
 from services.file_processor import FileProcessor
@@ -192,31 +193,41 @@ async def create_incident_summary(
             detail="OpenAI API key is required. Please provide it via the frontend settings or configure it on the server."
         )
     
+    # Process files immediately before background task (to avoid file handle closure)
+    logger.info(f"📁 Processing {len(files)} files before background analysis")
+    try:
+        processed_files = await file_processor.process_files(files)
+        logger.info(f"✅ Successfully processed {len(processed_files)} files")
+    except Exception as e:
+        logger.error(f"❌ Failed to process files: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to process uploaded files: {str(e)}"
+        )
+    
     # Generate task ID for progress tracking
     import uuid
     task_id = str(uuid.uuid4())
     
-    logger.info(f"📁 Starting background analysis for {len(files)} files, task_id: {task_id}")
+    logger.info(f"📁 Starting background analysis for {len(processed_files)} processed files, task_id: {task_id}")
     logger.info(f"🔑 Using API key source: {'frontend' if openai_api_key else 'server environment'}")
     
     # Initialize progress
     update_progress(task_id, "start", "Analysis request received...", 0)
     
-    # Start background analysis with API keys
-    background_tasks.add_task(run_analysis_background, task_id, files, final_openai_key, cohere_api_key or settings.cohere_api_key)
+    # Start background analysis with processed files and API keys
+    background_tasks.add_task(run_analysis_background, task_id, processed_files, final_openai_key, cohere_api_key or settings.cohere_api_key)
     
     # Return immediately with task_id
     return {"task_id": task_id, "status": "started"}
 
-async def run_analysis_background(task_id: str, files: List[UploadFile], openai_api_key: Optional[str] = None, cohere_api_key: Optional[str] = None):
+async def run_analysis_background(task_id: str, processed_files: List[ProcessedFile], openai_api_key: Optional[str] = None, cohere_api_key: Optional[str] = None):
     """Run the analysis in the background with progress updates."""
     try:
         update_progress(task_id, "start", "Starting incident analysis...", 5)
         
-        # Process uploaded files
-        update_progress(task_id, "processing", "Processing uploaded files...", 15)
-        processed_files = await file_processor.process_files(files)
-        update_progress(task_id, "processing", f"Processed {len(processed_files)} files", 25)
+        # Files are already processed, so skip file processing step
+        update_progress(task_id, "processing", f"Using {len(processed_files)} processed files", 25)
         
         # Run agent analysis with progress updates and dynamic API keys
         update_progress(task_id, "analysis", "Initializing AI analysis...", 30)
@@ -237,7 +248,7 @@ async def run_analysis_background(task_id: str, files: List[UploadFile], openai_
             "similar_incidents": [si.dict() for si in summary_result.similar_incidents],
             "recommendations": [r.dict() for r in summary_result.recommendations],
             "processing_time_ms": summary_result.processing_time_ms,
-            "files_processed": len(files)
+            "files_processed": len(processed_files)
         }
         
         update_progress(task_id, "complete", "Analysis completed successfully!", 100, completed=True)
