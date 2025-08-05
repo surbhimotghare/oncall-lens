@@ -112,15 +112,17 @@ This assessment provides a solid foundation for targeted improvements, with the 
 
 #### **Performance Comparison Results:** 
 I successfully ran the same RAGAS evaluation from Task 5 against the improved application using advanced retrieval techniques. The results demonstrate dramatic improvements across all metrics:
-    
-    | Metric | Baseline (Task 5) | Advanced RAG (Task 7) | Improvement |
-    |--------|-------------------|----------------------|-------------|
-    | Faithfulness | 0.267 | **1.000** | **+274.5%** |
-    | Answer Relevancy | 0.518 | **0.680** | **+31.3%** |
-    | Context Precision | 0.750 | **1.000** | **+33.3%** |
-    | Context Recall | 0.833 | **1.000** | **+20.0%** |
-    | Semantic Similarity | 0.437 | **1.000** | **+128.8%** |
-    | Answer Correctness | 0.163 | **1.000** | **+513.5%** |
+
+**Baseline vs Advanced RAG Performance:**
+
+| Metric | Baseline (Task 5) | Advanced RAG (Task 7) | Improvement |
+|:-------|:------------------|:---------------------|:------------|
+| Faithfulness | 0.267 | **1.000** | **+274.5%** |
+| Answer Relevancy | 0.518 | **0.680** | **+31.3%** |
+| Context Precision | 0.750 | **1.000** | **+33.3%** |
+| Context Recall | 0.833 | **1.000** | **+20.0%** |
+| Semantic Similarity | 0.437 | **1.000** | **+128.8%** |
+| Answer Correctness | 0.163 | **1.000** | **+513.5%** |
 
 - **Key Findings:**
     1. **Hybrid and Ensemble Strategies Excel**: Both the Hybrid (BM25 + Semantic) and Ensemble (all strategies combined) retrievers achieved perfect scores (1.000) in Faithfulness, Context Precision, Context Recall, Semantic Similarity, and Answer Correctness.
