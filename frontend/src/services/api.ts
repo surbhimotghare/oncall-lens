@@ -17,11 +17,35 @@ export interface ProgressUpdate {
   timestamp: number;
 }
 
+export interface ApiKeys {
+  openaiApiKey: string;
+  cohereApiKey: string;
+}
+
 export class ApiError extends Error {
   constructor(message: string, public status?: number) {
     super(message);
     this.name = 'ApiError';
   }
+}
+
+// Helper function to get API keys from localStorage
+function getApiKeys(): ApiKeys {
+  // Check if we're in a browser environment
+  if (typeof window === 'undefined') {
+    return { openaiApiKey: '', cohereApiKey: '' };
+  }
+  
+  return {
+    openaiApiKey: localStorage.getItem('oncall_openai_api_key') || '',
+    cohereApiKey: localStorage.getItem('oncall_cohere_api_key') || ''
+  };
+}
+
+// Helper function to check if frontend API keys are configured
+function hasFrontendApiKeys(): boolean {
+  const apiKeys = getApiKeys();
+  return apiKeys.openaiApiKey.trim().length > 0;
 }
 
 export async function analyzeIncident(files: File[]): Promise<{task_id: string}> {
@@ -30,6 +54,15 @@ export async function analyzeIncident(files: File[]): Promise<{task_id: string}>
   files.forEach((file) => {
     formData.append('files', file);
   });
+
+  // Add API keys from frontend if available
+  const apiKeys = getApiKeys();
+  if (apiKeys.openaiApiKey.trim()) {
+    formData.append('openai_api_key', apiKeys.openaiApiKey);
+  }
+  if (apiKeys.cohereApiKey.trim()) {
+    formData.append('cohere_api_key', apiKeys.cohereApiKey);
+  }
 
   try {
     const response = await fetch(`${API_BASE_URL}/summarize`, {
@@ -125,4 +158,21 @@ export function subscribeToProgress(taskId: string, onProgress: (update: Progres
     console.log('🧹 Cleaning up progress stream');
     eventSource.close();
   };
+}
+
+// Helper function to check if API keys are configured (either frontend or backend)
+export function areApiKeysConfigured(): boolean {
+  // If frontend has API keys, we're good
+  if (hasFrontendApiKeys()) {
+    return true;
+  }
+  
+  // Otherwise, assume backend might have them configured
+  // We'll let the backend handle the validation
+  return true;
+}
+
+// Helper function to check if frontend API keys are available
+export function hasFrontendApiKeysConfigured(): boolean {
+  return hasFrontendApiKeys();
 } 

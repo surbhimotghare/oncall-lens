@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     api_port: int = Field(default=8000, description="API port")
     
     # OpenAI settings
-    openai_api_key: str = Field(..., description="OpenAI API key")
+    openai_api_key: Optional[str] = Field(default=None, description="OpenAI API key (can be provided via frontend)")
     openai_model: str = Field(default="gpt-4o", description="OpenAI model to use")
     openai_embedding_model: str = Field(default="text-embedding-3-small", description="OpenAI embedding model")
     openai_max_tokens: int = Field(default=4000, description="Max tokens for OpenAI responses")
