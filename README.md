@@ -4,6 +4,56 @@ An intelligent web application that acts as an expert assistant for on-call engi
 
 > 📋 **Certification Challenge**: This project is part of the AI Engineering certification challenge. See [Certification-Challenge-Oncall-Lens.md](Certification-Challenge-Oncall-Lens.md) for detailed project planning, implementation progress, and evaluation results.
 
+```mermaid
+graph TD
+    subgraph "User's Browser"
+        User(👤 User)
+        Frontend[🌐 Next.js Frontend]
+    end
+
+    subgraph "Cloud Platform (e.g., Vercel)"
+        Backend[🚀 FastAPI Backend]
+    end
+
+    subgraph "AI Core (Managed by Backend)"
+        Agent[🤖 LangChain Agent]
+        LLM[🧠 LLM: gpt-4o]
+        VDB[(🗄️ Qdrant<br>Vector Store)]
+        APIs(📡 External APIs<br>e.g., Tavily)
+    end
+
+    subgraph "Data Sources"
+        Uploads(📄 User Files<br>logs, diffs, pngs)
+        KnowledgeBase(📚 Historical Postmortems)
+    end
+
+    %% --- Flows ---
+    User -->|Interacts with UI| Frontend
+    User -->|Uploads Incident Files| Uploads
+    Frontend -->|Sends API Request| Backend
+
+    Backend -->|Invokes Agent| Agent
+    Agent -->|Gets Historical Context| VDB
+    Agent -->|Gets External Info| APIs
+    Agent -->|Reasons & Synthesizes| LLM
+
+    LLM -->|Returns Final Analysis| Agent
+    Agent -->|Returns Final Analysis| Backend
+    Backend -->|Sends JSON Summary| Frontend
+    Frontend -->|Displays Summary| User
+
+    %% --- Data Ingestion (Offline Process) ---
+    KnowledgeBase -->|Ingested & Vectorized| VDB
+
+    %% --- Styling ---
+    style User fill:#D6EAF8,stroke:#333,stroke-width:2px
+    style Frontend fill:#AEB6BF,stroke:#333,stroke-width:2px
+    style Backend fill:#AED6F1,stroke:#333,stroke-width:2px
+    style Agent fill:#A9DFBF,stroke:#333,stroke-width:2px
+    style VDB fill:#F5B7B1,stroke:#333,stroke-width:2px
+```
+
+
 ## 🏗️ Project Structure
 
 ```
