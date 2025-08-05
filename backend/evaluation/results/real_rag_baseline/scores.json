@@ -1,0 +1,17 @@
+{
+  "metadata": {
+    "run_name": "real_rag_baseline",
+    "timestamp": "2025-08-04T20:40:16.803431",
+    "total_questions": 5,
+    "model": "gpt-4o",
+    "embedding_model": "text-embedding-3-small"
+  },
+  "scores": {
+    "faithfulness": 0.0,
+    "answer_relevancy": 0.482,
+    "context_precision": 0.0,
+    "context_recall": 0.0,
+    "semantic_similarity": 0.453,
+    "answer_correctness": 0.159
+  }
+}
