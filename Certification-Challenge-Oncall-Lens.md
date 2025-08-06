@@ -1,5 +1,4 @@
-# Oncall Lens : Oncall Incident Summarizer
-
+# Certification-Challenge : Oncall Lens
 ---
 
 **Video Walkthrough**:
