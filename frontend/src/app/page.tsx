@@ -94,6 +94,10 @@ export default function Home() {
     if (error && error.includes('API key')) {
       setError(null);
     }
+    
+    // Update the hasApiKeys state to reflect the new API key status
+    const hasKeys = hasFrontendApiKeysConfigured();
+    setHasApiKeys(hasKeys);
   };
 
   const [hasApiKeys, setHasApiKeys] = useState(false);
