@@ -1,6 +1,6 @@
-# Oncall Lens: Oncall Incident Summarizer
+# Oncall Lens: AI-Powered Incident Analysis System
 
-An intelligent web application that acts as an expert assistant for on-call engineers during incident response. Upload incident artifacts (logs, stack traces, diffs, screenshots) and get AI-powered summaries with historical context using advanced retrieval techniques.
+An intelligent web application that helps on-call engineers and SREs diagnose production issues in minutes instead of hours. Upload logs, stack traces, and code diffs to get instant intelligent analysis with root cause identification, historical context from past incidents, and actionable recommendations—all powered by advanced RAG + Agent techniques achieving 513% improvement in answer accuracy.
 
 > 📋 **Certification Challenge**: This project is part of the AI Engineering certification challenge. See [Certification-Challenge-Oncall-Lens.md](Certification-Challenge-Oncall-Lens.md) for detailed project planning, implementation progress, and evaluation results.
 
@@ -16,14 +16,21 @@ graph TD
     end
 
     subgraph "AI Core (Managed by Backend)"
-        Agent[🤖 LangChain Agent]
+        Agent[🤖 Multi-Agent System<br/>LangGraph]
         LLM[🧠 LLM: gpt-4o]
         VDB[(🗄️ Qdrant<br>Vector Store)]
         APIs(📡 External APIs<br>e.g., Tavily)
     end
 
+    subgraph "Multi-Agent Workflow"
+        Triage[📋 Data Triage Agent]
+        Historical[🔍 Historical Analyst]
+        RootCause[🔧 Root Cause Analyzer]
+        Synthesizer[📝 Synthesizer Agent]
+    end
+
     subgraph "Data Sources"
-        Uploads(📄 User Files<br>logs, diffs, pngs)
+        Uploads(📄 User Files<br>logs, diffs, txt)
         KnowledgeBase(📚 Historical Postmortems)
     end
 
@@ -32,13 +39,15 @@ graph TD
     User -->|Uploads Incident Files| Uploads
     Frontend -->|Sends API Request| Backend
 
-    Backend -->|Invokes Agent| Agent
+    Backend -->|Invokes Multi-Agent| Agent
+    Agent -->|Data Triage| Triage
+    Triage -->|Historical Search| Historical
+    Historical -->|Root Cause Analysis| RootCause
+    RootCause -->|Final Synthesis| Synthesizer
+    
     Agent -->|Gets Historical Context| VDB
     Agent -->|Gets External Info| APIs
-    Agent -->|Reasons & Synthesizes| LLM
-
-    LLM -->|Returns Final Analysis| Agent
-    Agent -->|Returns Final Analysis| Backend
+    Synthesizer -->|Returns Final Analysis| Backend
     Backend -->|Sends JSON Summary| Frontend
     Frontend -->|Displays Summary| User
 
@@ -51,8 +60,11 @@ graph TD
     style Backend fill:#AED6F1,stroke:#333,stroke-width:2px
     style Agent fill:#A9DFBF,stroke:#333,stroke-width:2px
     style VDB fill:#F5B7B1,stroke:#333,stroke-width:2px
+    style Triage fill:#FAD7A0,stroke:#333,stroke-width:2px
+    style Historical fill:#D7BDE2,stroke:#333,stroke-width:2px
+    style RootCause fill:#A2D9CE,stroke:#333,stroke-width:2px
+    style Synthesizer fill:#F8C471,stroke:#333,stroke-width:2px
 ```
-
 
 ## 🏗️ Project Structure
 
@@ -62,8 +74,8 @@ oncall-lens/
 │   ├── main.py                # Main FastAPI application
 │   ├── requirements.txt       # Python dependencies
 │   ├── services/              # Business logic services
-│   │   ├── advanced_retrieval.py  # Advanced retrieval techniques
-│   │   ├── agent_service.py       # LangChain agent implementation
+│   │   ├── agent_service.py       # Multi-agent LangGraph implementation
+│   │   ├── file_processor.py      # File processing and validation
 │   │   └── vector_store.py        # Qdrant vector store integration
 │   ├── evaluation/            # RAGAS evaluation framework
 │   │   ├── ragas_evaluator.py     # RAGAS evaluation implementation
@@ -73,7 +85,13 @@ oncall-lens/
 │   └── data/
 │       ├── knowledge-base/    # Historical postmortem files (.md)
 │       └── sample-incident-1/ # Test incident files
-├── frontend/                  # Next.js frontend (coming soon)
+├── frontend/                  # Next.js frontend
+│   ├── src/
+│   │   ├── app/              # Next.js app router
+│   │   ├── components/       # React components
+│   │   └── services/         # API services
+│   ├── package.json          # Node.js dependencies
+│   └── tailwind.config.ts    # Tailwind CSS configuration
 ├── README.md                 # This file
 └── Certification-Challenge-Oncall-Lens.md  # Detailed project planning and results
 ```
@@ -81,8 +99,8 @@ oncall-lens/
 ## 🚀 Technology Stack
 
 - **Backend**: FastAPI (Python)
-- **Frontend**: Next.js (React/TypeScript) 
-- **AI Orchestration**: LangChain + LangGraph
+- **Frontend**: Next.js (React/TypeScript) + Tailwind CSS
+- **AI Orchestration**: LangChain + LangGraph (Multi-Agent)
 - **LLM**: OpenAI GPT-4o
 - **Embeddings**: OpenAI text-embedding-3-small
 - **Vector DB**: Qdrant
@@ -92,11 +110,14 @@ oncall-lens/
 
 ## 🎯 Features
 
-- **Multi-Modal File Processing**: Handles logs, stack traces, code diffs, and screenshots
+- **Multi-Agent Workflow**: 4 specialized agents (Data Triage, Historical Analyst, Root Cause Analyzer, Synthesizer)
+- **Multi-Modal File Processing**: Handles logs, stack traces, code diffs, and text files
 - **Advanced Retrieval Techniques**: 6 different retrieval strategies for optimal context retrieval
 - **Historical Context**: RAG-powered search through past incident postmortems
 - **Root Cause Analysis**: AI-powered identification of likely failure causes
 - **Actionable Recommendations**: Prioritized next steps for incident resolution
+- **Real-time Progress Tracking**: Server-Sent Events for live analysis updates
+- **Beautiful UI**: Modern, responsive interface with drag-and-drop file upload
 - **Comprehensive Evaluation**: RAGAS-based performance assessment
 
 ## 🔧 Development Setup
@@ -136,6 +157,23 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 Visit `http://localhost:8000/docs` for interactive API documentation.
 
+### Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Visit `http://localhost:3000` for the web interface.
+
+### Complete System Test
+1. **Start Qdrant**: `docker run -p 6333:6333 qdrant/qdrant`
+2. **Start Backend**: `cd backend && uvicorn main:app --host 0.0.0.0 --port 8000 --reload`
+3. **Start Frontend**: `cd frontend && npm run dev`
+4. **Configure API Keys**: Open `http://localhost:3000` and add your OpenAI/Cohere keys
+5. **Upload Sample Files**: Use files from `backend/data/sample-incident-1/`
+6. **Run Analysis**: Click "Analyze Incident" and watch the multi-agent workflow
+
 ## 📊 Current Implementation Status
 
 ### ✅ Completed
@@ -147,10 +185,22 @@ Visit `http://localhost:8000/docs` for interactive API documentation.
 - [x] **Phase 6**: RAGAS evaluation pipeline
 - [x] **Phase 7**: Advanced retrieval techniques (Task 6)
 - [x] **Phase 8**: Performance assessment with dramatic improvements (Task 7)
-- [x] **Phase 9**: Frontend Next.js application
+- [x] **Phase 9**: Frontend Next.js application with modern UI
+- [x] **Phase 10**: End-to-end testing and bug fixes
+- [x] **Phase 11**: Real-time progress tracking with Server-Sent Events
+- [x] **Phase 12**: API key management and settings modal
 
-### 🔄 In Progress  
-- [ ] **Phase 10**: Production deployment
+### 🎯 Production Ready
+- [x] **Complete System**: Full-stack application ready for production use
+- [x] **Multi-Agent Workflow**: 4-agent system for comprehensive analysis
+- [x] **User Interface**: Modern, responsive frontend with drag-and-drop
+- [x] **Error Handling**: Robust error handling and validation
+- [x] **Documentation**: Comprehensive setup and usage guides
+
+### 🔄 Future Enhancements
+- [ ] **Phase 13**: Production deployment (Docker, cloud hosting)
+- [ ] **Phase 14**: Advanced image processing with GPT-4 Vision
+- [ ] **Phase 15**: User authentication and team collaboration
 
 ## 🧠 Advanced Retrieval Techniques
 
@@ -204,6 +254,14 @@ Our advanced retrieval techniques achieved **dramatic improvements** across all 
 
 ## 🎮 Usage
 
+### Web Interface (Recommended)
+1. **Start the system** (see setup instructions above)
+2. **Open browser** to `http://localhost:3000`
+3. **Configure API keys** in the settings modal
+4. **Upload incident files** using drag-and-drop interface
+5. **Click "Analyze Incident"** and watch the multi-agent workflow
+6. **View results** with confidence scores and recommendations
+
 ### API Endpoints
 
 #### Health Check
@@ -213,10 +271,20 @@ GET /health
 
 #### Analyze Incident Files
 ```bash
-POST /analyze
+POST /summarize
 Content-Type: multipart/form-data
 
-Files: incident files (logs, diffs, screenshots)
+Files: incident files (logs, diffs, txt)
+```
+
+#### Get Analysis Results
+```bash
+GET /results/{task_id}
+```
+
+#### Get Progress Updates
+```bash
+GET /progress/{task_id}
 ```
 
 #### Test Advanced Retrieval
@@ -264,17 +332,18 @@ All evaluation results are stored in `backend/evaluation/results/` with detailed
 ## 🚀 Future Enhancements
 
 ### Planned Features
-1. **Frontend Application**: Next.js web interface for easy file upload and result viewing
-2. **Multi-Agent Architecture**: Specialized agents for different aspects of incident analysis
-3. **Fine-tuned Embeddings**: Domain-specific embedding models for better semantic understanding
-4. **User Feedback Loop**: Collect and incorporate user feedback for continuous improvement
-5. **Production Deployment**: Cloud deployment with monitoring and scaling
+1. **Production Deployment**: Docker containerization and cloud deployment
+2. **Advanced Image Processing**: GPT-4 Vision API integration for dashboard screenshots
+3. **User Authentication**: Team collaboration and user management
+4. **Fine-tuned Embeddings**: Domain-specific embedding models for better semantic understanding
+5. **User Feedback Loop**: Collect and incorporate user feedback for continuous improvement
 
 ### Advanced Features
 - **Graph RAG**: Knowledge graph for service dependencies and incident relationships
 - **Real-time Monitoring**: Integration with monitoring systems for automatic incident detection
 - **Collaborative Features**: Team collaboration tools for incident response
 - **Custom Integrations**: Support for various logging and monitoring platforms
+- **Mobile App**: React Native mobile application for on-the-go incident analysis
 
 ## 🤝 Contributing
 
@@ -298,4 +367,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Oncall Lens** - Making incident response faster, smarter, and more reliable with AI-powered analysis and advanced retrieval techniques.
+**Oncall Lens** - Making incident response faster, smarter, and more reliable with AI-powered multi-agent analysis and advanced retrieval techniques.
