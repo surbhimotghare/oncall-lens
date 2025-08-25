@@ -19,7 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="transition-colors duration-300">
-      <body className={`${inter.variable} font-sans antialiased bg-background text-foreground dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300`}>
+      <body 
+        className={`${inter.variable} font-sans antialiased bg-background text-foreground dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300`}
+        suppressHydrationWarning={true}
+      >
         {children}
       </body>
     </html>
