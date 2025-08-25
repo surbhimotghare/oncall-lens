@@ -131,7 +131,7 @@ export default function Home() {
             </div>
             
                           <div className="flex items-center space-x-6">
-              {/* Status indicator */}
+                            {/* Status indicator */}
               {isClient && (
                 <div className="hidden md:flex items-center space-x-4">
                   <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
