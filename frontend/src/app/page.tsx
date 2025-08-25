@@ -96,7 +96,13 @@ export default function Home() {
     }
   };
 
-  const hasApiKeys = hasFrontendApiKeysConfigured();
+  const [hasApiKeys, setHasApiKeys] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    setHasApiKeys(hasFrontendApiKeysConfigured());
+  }, []);
 
   const validFilesCount = files.filter(file => {
     const extension = file.name.split('.').pop()?.toLowerCase() || '';
@@ -126,19 +132,21 @@ export default function Home() {
             
                           <div className="flex items-center space-x-6">
               {/* Status indicator */}
-              <div className="hidden md:flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
-                  <div className={`w-2 h-2 rounded-full ${hasApiKeys ? 'bg-green-500' : 'bg-amber-500'}`}></div>
-                  <span>{hasApiKeys ? 'API Connected' : 'Setup Required'}</span>
-                </div>
-                
-                {files.length > 0 && (
+              {isClient && (
+                <div className="hidden md:flex items-center space-x-4">
                   <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
-                    <span className="font-medium text-blue-600 dark:text-blue-400">{validFilesCount}</span>
-                    <span>files ready</span>
+                    <div className={`w-2 h-2 rounded-full ${hasApiKeys ? 'bg-green-500' : 'bg-amber-500'}`}></div>
+                    <span>{hasApiKeys ? 'API Connected' : 'Setup Required'}</span>
                   </div>
-                )}
-              </div>
+                
+                  {files.length > 0 && (
+                    <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
+                      <span className="font-medium text-blue-600 dark:text-blue-400">{validFilesCount}</span>
+                      <span>files ready</span>
+                    </div>
+                  )}
+                </div>
+              )}
               
               <div className="flex items-center space-x-3">
                 <button
@@ -159,7 +167,7 @@ export default function Home() {
       </header>
 
       {/* API Key Warning Banner */}
-      {!hasApiKeys && (
+      {isClient && !hasApiKeys && (
         <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
