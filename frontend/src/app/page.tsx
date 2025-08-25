@@ -4,6 +4,7 @@ import { useState } from 'react';
 import FileUploader from '@/components/FileUploader';
 import AnalysisResult from '@/components/AnalysisResult';
 import Settings from '@/components/Settings';
+import ThemeToggle from '@/components/ThemeToggle';
 import { analyzeIncident, getAnalysisResults, subscribeToProgress, ProgressUpdate, ApiError, ApiKeys, hasFrontendApiKeysConfigured } from '@/services/api';
 import { ChevronLeft, ChevronRight, Settings as SettingsIcon } from 'lucide-react';
 
@@ -124,7 +125,7 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="flex items-center space-x-6">
+                          <div className="flex items-center space-x-6">
               {/* Status indicator */}
               <div className="hidden md:flex items-center space-x-4">
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -140,17 +141,21 @@ export default function Home() {
                 )}
               </div>
               
-              <button
-                onClick={() => setIsSettingsOpen(true)}
-                className={`p-3 rounded-xl transition-all duration-200 ${
-                  hasApiKeys 
-                    ? 'text-gray-500 hover:text-gray-700 hover:bg-gray-100' 
-                    : 'text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg hover:shadow-xl animate-pulse hover:animate-none'
-                }`}
-                title="API Settings"
-              >
-                <SettingsIcon className="w-5 h-5" />
-              </button>
+              <div className="flex items-center space-x-3">
+                <ThemeToggle />
+                
+                <button
+                  onClick={() => setIsSettingsOpen(true)}
+                  className={`p-3 rounded-xl transition-all duration-200 ${
+                    hasApiKeys 
+                      ? 'text-gray-500 hover:text-gray-700 hover:bg-gray-100' 
+                      : 'text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg hover:shadow-xl animate-pulse hover:animate-none'
+                  }`}
+                  title="API Settings"
+                >
+                  <SettingsIcon className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>

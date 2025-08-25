@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -8,6 +8,9 @@ import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { AlertCircle, CheckCircle, Clock, TrendingUp, Shield, Zap, Brain, History, Target, FileSearch } from 'lucide-react';
 import { ProgressUpdate } from '@/services/api';
 import LoadingSpinner, { AnalysisSkeleton } from './LoadingSpinner';
+import ActionButtons from './ActionButtons';
+import AgentReasoning from './AgentReasoning';
+import StreamingText from './StreamingText';
 
 interface AnalysisResultProps {
   result: string | null;
@@ -102,6 +105,8 @@ const ConfidenceIndicator = ({ confidence }: { confidence: number }) => {
 export default function AnalysisResult({ result, isLoading, error, confidence, progress }: AnalysisResultProps) {
   console.log('🔍 AnalysisResult render:', { isLoading, progress, result: !!result });
   
+  const [showStreaming, setShowStreaming] = useState(false);
+  
   // Enhanced error display
   if (error) {
     return (
@@ -133,11 +138,17 @@ export default function AnalysisResult({ result, isLoading, error, confidence, p
     <div className="space-y-6">
       {/* Enhanced progress display */}
       {progress && (
-        <LoadingSpinner 
-          stage={progress.stage}
-          percentage={progress.percentage}
-          message={progress.message}
-        />
+        <>
+          <LoadingSpinner 
+            stage={progress.stage}
+            percentage={progress.percentage}
+            message={progress.message}
+          />
+          <AgentReasoning 
+            currentStep={progress.stage}
+            isVisible={true}
+          />
+        </>
       )}
       
       {/* Loading state without progress */}
@@ -146,6 +157,9 @@ export default function AnalysisResult({ result, isLoading, error, confidence, p
       {/* Results display */}
       {!isLoading && result && (
         <div className="space-y-6">
+          {/* Agent reasoning display */}
+          <AgentReasoning isVisible={true} />
+          
           {/* Confidence indicator */}
           {confidence !== undefined && (
             <ConfidenceIndicator confidence={confidence} />
@@ -262,6 +276,13 @@ export default function AnalysisResult({ result, isLoading, error, confidence, p
             </ReactMarkdown>
               </div>
             </div>
+            
+            {/* Action buttons */}
+            <ActionButtons 
+              content={result}
+              title="Incident Analysis Report"
+              confidence={confidence}
+            />
           </div>
         </div>
       )}
