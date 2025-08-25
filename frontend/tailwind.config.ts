@@ -6,6 +6,7 @@ export default {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
       colors: {
@@ -17,6 +18,14 @@ export default {
         "accent-hover": "#4338CA", // Darker indigo for hover
         muted: "#6B7280", // Muted text
         "muted-foreground": "#9CA3AF", // Even more muted text
+        // Dark mode colors
+        dark: {
+          background: "#0F172A", // Dark slate background
+          foreground: "#F8FAFC", // Light text
+          card: "#1E293B", // Dark card background
+          border: "#334155", // Dark borders
+          muted: "#94A3B8", // Muted text in dark mode
+        }
       },
       fontFamily: {
         sans: [

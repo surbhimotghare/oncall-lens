@@ -1,6 +1,6 @@
 # Quick Task 7: Advanced Retrieval Performance Assessment
 
-Generated on: 2025-08-04 22:56:39
+Generated on: 2025-08-24 20:55:51
 
 ## Overview
 
@@ -22,19 +22,19 @@ Quick evaluation of advanced retrieval techniques against baseline results from 
 
 | Metric | Score | Improvement | Status |
 |--------|-------|-------------|--------|
-| Faithfulness | 0.875 | +227.7% | ✅ Good |
+| Faithfulness | 1.000 | +274.5% | ✅ Good |
 | Answer Relevancy | 0.680 | +31.3% | 🔴 Needs Improvement |
 | Context Precision | 1.000 | +33.3% | ✅ Good |
 | Context Recall | 1.000 | +20.0% | ✅ Good |
 | Semantic Similarity | 1.000 | +128.8% | ✅ Good |
-| Answer Correctness | 0.906 | +455.8% | ✅ Good |
+| Answer Correctness | 1.000 | +513.5% | ✅ Good |
 
 
 ### Hybrid
 
 | Metric | Score | Improvement | Status |
 |--------|-------|-------------|--------|
-| Faithfulness | 1.000 | +274.5% | ✅ Good |
+| Faithfulness | 0.875 | +227.7% | ✅ Good |
 | Answer Relevancy | 0.680 | +31.3% | 🔴 Needs Improvement |
 | Context Precision | 1.000 | +33.3% | ✅ Good |
 | Context Recall | 1.000 | +20.0% | ✅ Good |
@@ -46,12 +46,12 @@ Quick evaluation of advanced retrieval techniques against baseline results from 
 
 | Metric | Score | Improvement | Status |
 |--------|-------|-------------|--------|
-| Faithfulness | 1.000 | +274.5% | ✅ Good |
+| Faithfulness | 0.000 | -100.0% | 🔴 Needs Improvement |
 | Answer Relevancy | 0.680 | +31.3% | 🔴 Needs Improvement |
-| Context Precision | 1.000 | +33.3% | ✅ Good |
-| Context Recall | 1.000 | +20.0% | ✅ Good |
+| Context Precision | 0.000 | -100.0% | 🔴 Needs Improvement |
+| Context Recall | 0.000 | -100.0% | 🔴 Needs Improvement |
 | Semantic Similarity | 1.000 | +128.8% | ✅ Good |
-| Answer Correctness | 1.000 | +513.5% | ✅ Good |
+| Answer Correctness | 0.906 | +455.8% | ✅ Good |
 
 
 ## Quick Summary

@@ -1,12 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { AlertCircle, CheckCircle, Clock, Loader2, Database, Search, Target, FileText } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, TrendingUp, Shield, Zap, Brain, History, Target, FileSearch } from 'lucide-react';
 import { ProgressUpdate } from '@/services/api';
+import LoadingSpinner, { AnalysisSkeleton } from './LoadingSpinner';
+import ActionButtons from './ActionButtons';
+import AgentReasoning from './AgentReasoning';
+import StreamingText from './StreamingText';
 
 interface AnalysisResultProps {
   result: string | null;
@@ -16,127 +20,84 @@ interface AnalysisResultProps {
   progress?: ProgressUpdate | null;
 }
 
-const LoadingSkeleton = () => (
-  <div className="space-y-4 animate-pulse">
-    <div className="flex items-center space-x-2">
-      <Loader2 className="w-5 h-5 text-accent animate-spin" />
-      <div className="h-6 bg-border rounded w-48"></div>
+// Enhanced empty state with actionable tips
+const EmptyState = () => (
+  <div className="flex flex-col items-center justify-center py-16 text-center">
+    <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-6">
+      <Brain className="w-10 h-10 text-blue-600" />
     </div>
-    <div className="space-y-3">
-      <div className="h-4 bg-border rounded w-full"></div>
-      <div className="h-4 bg-border rounded w-5/6"></div>
-      <div className="h-4 bg-border rounded w-4/6"></div>
-    </div>
-    <div className="space-y-2">
-      <div className="h-4 bg-border rounded w-32"></div>
-      <div className="h-20 bg-border rounded w-full"></div>
-    </div>
-    <div className="space-y-3">
-      <div className="h-4 bg-border rounded w-full"></div>
-      <div className="h-4 bg-border rounded w-3/4"></div>
-    </div>
-  </div>
-);
-
-const ProgressDisplay = ({ progress }: { progress: ProgressUpdate }) => {
-  console.log('🎨 Rendering ProgressDisplay:', progress);
-  
-  const getStageIcon = (stage: string) => {
-    switch (stage) {
-      case 'data_triage':
-        return <FileText className="w-4 h-4" />;
-      case 'historical_search':
-        return <Search className="w-4 h-4" />;
-      case 'root_cause':
-        return <Target className="w-4 h-4" />;
-      case 'synthesis':
-        return <Database className="w-4 h-4" />;
-      default:
-        return <Loader2 className="w-4 h-4 animate-spin" />;
-    }
-  };
-
-  const getStageColor = (stage: string) => {
-    switch (stage) {
-      case 'data_triage':
-        return 'text-blue-600';
-      case 'historical_search':
-        return 'text-green-600';
-      case 'root_cause':
-        return 'text-orange-600';
-      case 'synthesis':
-        return 'text-purple-600';
-      default:
-        return 'text-gray-600';
-    }
-  };
-
-  return (
-    <div className="space-y-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-      <h3 className="text-sm font-medium text-blue-900">Analysis Progress</h3>
-      
-      {/* Progress Bar */}
-      <div className="w-full bg-gray-200 rounded-full h-2">
-        <div 
-          className="bg-accent h-2 rounded-full transition-all duration-500"
-          style={{ width: `${progress.percentage}%` }}
-        ></div>
-      </div>
-      
-      {/* Progress Details */}
-      <div className="flex items-center space-x-3">
-        {getStageIcon(progress.stage)}
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <span className={`font-medium ${getStageColor(progress.stage)}`}>
-              {progress.message}
-            </span>
-            <span className="text-sm text-muted">
-              {progress.percentage}%
-            </span>
-          </div>
+    <div className="max-w-md">
+      <h3 className="text-xl font-semibold text-gray-900 mb-3">
+        Ready to Analyze Your Incident
+      </h3>
+      <p className="text-gray-600 mb-6">
+        Upload your incident files and our AI-powered multi-agent system will provide comprehensive analysis with root cause identification and actionable recommendations.
+      </p>
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="flex items-center space-x-2 text-gray-500">
+          <FileSearch className="w-4 h-4 text-blue-500" />
+          <span>Data Triage</span>
+        </div>
+        <div className="flex items-center space-x-2 text-gray-500">
+          <History className="w-4 h-4 text-green-500" />
+          <span>Historical Context</span>
+        </div>
+        <div className="flex items-center space-x-2 text-gray-500">
+          <Target className="w-4 h-4 text-orange-500" />
+          <span>Root Cause Analysis</span>
+        </div>
+        <div className="flex items-center space-x-2 text-gray-500">
+          <Shield className="w-4 h-4 text-purple-500" />
+          <span>Recommendations</span>
         </div>
       </div>
     </div>
-  );
-};
-
-const EmptyState = () => (
-  <div className="flex flex-col items-center justify-center h-64 text-center space-y-4">
-    <Clock className="w-12 h-12 text-muted" />
-    <div>
-      <h3 className="text-lg font-medium text-foreground">
-        Ready for Analysis
-      </h3>
-      <p className="text-muted mt-1">
-        Your incident analysis will appear here once you upload files and click "Analyze"
-      </p>
-    </div>
   </div>
 );
 
+// Enhanced confidence indicator with visual improvements
 const ConfidenceIndicator = ({ confidence }: { confidence: number }) => {
   const getConfidenceColor = (score: number) => {
-    if (score >= 0.8) return 'text-green-600';
-    if (score >= 0.6) return 'text-yellow-600';
-    return 'text-red-600';
+    if (score >= 0.8) return { text: 'text-green-700', bg: 'bg-green-100', border: 'border-green-300', icon: 'text-green-600' };
+    if (score >= 0.6) return { text: 'text-yellow-700', bg: 'bg-yellow-100', border: 'border-yellow-300', icon: 'text-yellow-600' };
+    return { text: 'text-red-700', bg: 'bg-red-100', border: 'border-red-300', icon: 'text-red-600' };
   };
 
   const getConfidenceLabel = (score: number) => {
-    if (score >= 0.8) return 'High';
-    if (score >= 0.6) return 'Medium';
-    return 'Low';
+    if (score >= 0.8) return 'High Confidence';
+    if (score >= 0.6) return 'Medium Confidence';
+    return 'Low Confidence';
   };
 
+  const colors = getConfidenceColor(confidence);
+  const percentage = Math.round(confidence * 100);
+
   return (
-    <div className="flex items-center space-x-2 text-sm">
-      <CheckCircle className={`w-4 h-4 ${getConfidenceColor(confidence)}`} />
-      <span className="text-muted">
-        Confidence: 
-        <span className={`ml-1 font-medium ${getConfidenceColor(confidence)}`}>
-          {getConfidenceLabel(confidence)} ({Math.round(confidence * 100)}%)
+    <div className={`flex items-center justify-between p-4 rounded-lg border ${colors.bg} ${colors.border}`}>
+      <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2">
+          <CheckCircle className={`w-5 h-5 ${colors.icon}`} />
+          <span className={`font-semibold ${colors.text}`}>
+            {getConfidenceLabel(confidence)}
+          </span>
+        </div>
+        <span className={`text-sm ${colors.text}`}>
+          {percentage}% accuracy
         </span>
-      </span>
+      </div>
+      
+      {/* Progress bar visualization */}
+      <div className="flex items-center space-x-2">
+        <div className="w-24 bg-white rounded-full h-2 border">
+          <div 
+            className={`h-2 rounded-full transition-all duration-1000 ${
+              confidence >= 0.8 ? 'bg-green-500' : confidence >= 0.6 ? 'bg-yellow-500' : 'bg-red-500'
+            }`}
+            style={{ width: `${percentage}%` }}
+          ></div>
+        </div>
+        <TrendingUp className={`w-4 h-4 ${colors.icon}`} />
+      </div>
     </div>
   );
 };
@@ -144,13 +105,30 @@ const ConfidenceIndicator = ({ confidence }: { confidence: number }) => {
 export default function AnalysisResult({ result, isLoading, error, confidence, progress }: AnalysisResultProps) {
   console.log('🔍 AnalysisResult render:', { isLoading, progress, result: !!result });
   
+  const [showStreaming, setShowStreaming] = useState(false);
+  
+  // Enhanced error display
   if (error) {
     return (
-      <div className="flex items-start space-x-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-        <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-        <div>
-          <h3 className="text-sm font-medium text-red-800">Analysis Failed</h3>
-          <p className="text-sm text-red-700 mt-1">{error}</p>
+      <div className="space-y-4">
+        <div className="flex items-start space-x-4 p-6 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl shadow-sm">
+          <div className="p-2 bg-red-100 rounded-full">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-red-900 mb-2">Analysis Failed</h3>
+            <p className="text-red-800 mb-4">{error}</p>
+            <div className="flex items-center space-x-4 text-sm">
+              <div className="flex items-center space-x-2 text-red-700">
+                <Zap className="w-4 h-4" />
+                <span>Try uploading different files</span>
+              </div>
+              <div className="flex items-center space-x-2 text-red-700">
+                <Shield className="w-4 h-4" />
+                <span>Check API key configuration</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -158,20 +136,51 @@ export default function AnalysisResult({ result, isLoading, error, confidence, p
 
   return (
     <div className="space-y-6">
-      {/* Always show progress if available */}
-      {progress && <ProgressDisplay progress={progress} />}
+      {/* Enhanced progress display */}
+      {progress && (
+        <>
+          <LoadingSpinner 
+            stage={progress.stage}
+            percentage={progress.percentage}
+            message={progress.message}
+          />
+          <AgentReasoning 
+            currentStep={progress.stage}
+            isVisible={true}
+          />
+        </>
+      )}
       
-      {isLoading && !progress && <LoadingSkeleton />}
+      {/* Loading state without progress */}
+      {isLoading && !progress && <AnalysisSkeleton />}
       
+      {/* Results display */}
       {!isLoading && result && (
-        <div className="space-y-4">
+        <div className="space-y-6">
+          {/* Agent reasoning display */}
+          <AgentReasoning isVisible={true} />
+          
+          {/* Confidence indicator */}
           {confidence !== undefined && (
-            <div className="pb-3 border-b border-border">
-              <ConfidenceIndicator confidence={confidence} />
-            </div>
+            <ConfidenceIndicator confidence={confidence} />
           )}
           
-          <div className="prose prose-sm max-w-none">
+          {/* Analysis content */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Brain className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">AI Analysis Results</h2>
+                  <p className="text-sm text-gray-600">Comprehensive incident analysis with recommendations</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -202,57 +211,62 @@ export default function AnalysisResult({ result, isLoading, error, confidence, p
                   );
                 },
                 h1: ({ children }) => (
-                  <h1 className="text-2xl font-bold text-foreground mb-4 pb-2 border-b border-border">
+                  <h1 className="text-2xl font-bold text-gray-900 mb-6 pb-3 border-b border-gray-200 flex items-center space-x-3">
+                    <Target className="w-6 h-6 text-blue-600" />
                     {children}
                   </h1>
                 ),
                 h2: ({ children }) => (
-                  <h2 className="text-xl font-semibold text-foreground mb-3 mt-6">
+                  <h2 className="text-xl font-semibold text-gray-800 mb-4 mt-8 flex items-center space-x-2">
+                    <div className="w-2 h-6 bg-blue-500 rounded-full"></div>
                     {children}
                   </h2>
                 ),
                 h3: ({ children }) => (
-                  <h3 className="text-lg font-medium text-foreground mb-2 mt-4">
+                  <h3 className="text-lg font-medium text-gray-800 mb-3 mt-6">
                     {children}
                   </h3>
                 ),
                 p: ({ children }) => (
-                  <p className="text-foreground mb-3 leading-relaxed">
+                  <p className="text-gray-700 mb-4 leading-relaxed">
                     {children}
                   </p>
                 ),
                 ul: ({ children }) => (
-                  <ul className="list-disc list-inside space-y-1 mb-3 text-foreground">
+                  <ul className="list-none space-y-2 mb-4">
                     {children}
                   </ul>
                 ),
                 ol: ({ children }) => (
-                  <ol className="list-decimal list-inside space-y-1 mb-3 text-foreground">
+                  <ol className="list-decimal list-inside space-y-2 mb-4 text-gray-700">
                     {children}
                   </ol>
                 ),
                 li: ({ children }) => (
-                  <li className="text-foreground">{children}</li>
+                  <li className="text-gray-700 flex items-start space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span>{children}</span>
+                  </li>
                 ),
                 blockquote: ({ children }) => (
-                  <blockquote className="border-l-4 border-accent pl-4 py-2 bg-accent/5 rounded-r-md mb-4">
+                  <blockquote className="border-l-4 border-blue-400 pl-6 py-3 bg-blue-50 rounded-r-lg mb-4 italic">
                     {children}
                   </blockquote>
                 ),
                 table: ({ children }) => (
-                  <div className="overflow-x-auto mb-4">
-                    <table className="min-w-full border border-border rounded-lg">
+                  <div className="overflow-x-auto mb-6">
+                    <table className="min-w-full border border-gray-200 rounded-lg shadow-sm">
                       {children}
                     </table>
                   </div>
                 ),
                 th: ({ children }) => (
-                  <th className="px-4 py-2 bg-background border-b border-border text-left font-medium text-foreground">
+                  <th className="px-4 py-3 bg-gray-50 border-b border-gray-200 text-left font-semibold text-gray-900">
                     {children}
                   </th>
                 ),
                 td: ({ children }) => (
-                  <td className="px-4 py-2 border-b border-border text-foreground">
+                  <td className="px-4 py-3 border-b border-gray-200 text-gray-700">
                     {children}
                   </td>
                 ),
@@ -260,10 +274,20 @@ export default function AnalysisResult({ result, isLoading, error, confidence, p
             >
               {result}
             </ReactMarkdown>
+              </div>
+            </div>
+            
+            {/* Action buttons */}
+            <ActionButtons 
+              content={result}
+              title="Incident Analysis Report"
+              confidence={confidence}
+            />
           </div>
         </div>
       )}
       
+      {/* Empty state */}
       {!isLoading && !result && !progress && <EmptyState />}
     </div>
   );
