@@ -106,9 +106,9 @@ export default function Home() {
   }).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-300">
       {/* Enhanced Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
+      <header className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-sm sticky top-0 z-40 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -121,21 +121,21 @@ export default function Home() {
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   Oncall Lens
                 </h1>
-                <p className="text-sm text-gray-600">AI-Powered Incident Analysis</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">AI-Powered Incident Analysis</p>
               </div>
             </div>
             
                           <div className="flex items-center space-x-6">
               {/* Status indicator */}
               <div className="hidden md:flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
                   <div className={`w-2 h-2 rounded-full ${hasApiKeys ? 'bg-green-500' : 'bg-amber-500'}`}></div>
                   <span>{hasApiKeys ? 'API Connected' : 'Setup Required'}</span>
                 </div>
                 
                 {files.length > 0 && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <span className="font-medium text-blue-600">{validFilesCount}</span>
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
+                    <span className="font-medium text-blue-600 dark:text-blue-400">{validFilesCount}</span>
                     <span>files ready</span>
                   </div>
                 )}
@@ -148,7 +148,7 @@ export default function Home() {
                   onClick={() => setIsSettingsOpen(true)}
                   className={`p-3 rounded-xl transition-all duration-200 ${
                     hasApiKeys 
-                      ? 'text-gray-500 hover:text-gray-700 hover:bg-gray-100' 
+                      ? 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-slate-700' 
                       : 'text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg hover:shadow-xl animate-pulse hover:animate-none'
                   }`}
                   title="API Settings"
@@ -196,7 +196,7 @@ export default function Home() {
           {/* Left Column - Controls */}
           <div className={`transition-all duration-300 ${isLeftPanelCollapsed ? 'w-16' : 'w-96 lg:w-[28rem]'}`}>
             <div className="space-y-6 sticky top-24">
-              <div className="bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden relative">
+              <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-lg overflow-hidden relative transition-colors duration-300">
                 {/* Collapse Button - Only show after analysis */}
                 {analysisResult && (
                   <button
@@ -215,10 +215,10 @@ export default function Home() {
                 {!isLeftPanelCollapsed && (
                   <>
                     {/* Header */}
-                    <div className="px-6 py-5 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+                    <div className="px-6 py-5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 border-b border-gray-200 dark:border-slate-600 transition-colors duration-300">
                       <div className="flex items-center space-x-3 pr-8">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-blue-600">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-blue-600 dark:text-blue-400">
                             <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
                             <polyline points="14,2 14,8 20,8"></polyline>
                             <path d="M16 13H8"></path>
@@ -227,8 +227,8 @@ export default function Home() {
                           </svg>
                         </div>
                         <div>
-                          <h2 className="text-lg font-semibold text-gray-900">Upload Incident Files</h2>
-                          <p className="text-sm text-gray-600">Upload files for AI analysis</p>
+                          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Upload Incident Files</h2>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">Upload files for AI analysis</p>
                         </div>
                       </div>
                     </div>
@@ -236,7 +236,7 @@ export default function Home() {
                     {/* Content */}
                     <div className="p-6">
                       <div className="mb-6">
-                        <p className="text-gray-600 text-sm leading-relaxed">
+                        <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
                           Upload logs, stack traces, git diffs, or dashboard screenshots. 
                           Our multi-agent AI system will analyze them to provide comprehensive insights and actionable recommendations.
                         </p>
