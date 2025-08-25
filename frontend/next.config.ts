@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   // Disable the Next.js development indicator
   devIndicators: {
     buildActivity: false,
-    buildActivityPosition: 'bottom-right',
+    position: 'bottom-right',
   },
 };
 
