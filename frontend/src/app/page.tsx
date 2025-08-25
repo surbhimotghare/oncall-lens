@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FileUploader from '@/components/FileUploader';
 import AnalysisResult from '@/components/AnalysisResult';
 import Settings from '@/components/Settings';
@@ -99,6 +99,30 @@ export default function Home() {
 
   const hasApiKeys = hasFrontendApiKeysConfigured();
 
+  // Dark mode test effect
+  useEffect(() => {
+    const updateDarkModeStatus = () => {
+      const statusElement = document.getElementById('dark-mode-status');
+      if (statusElement) {
+        const isDark = document.documentElement.classList.contains('dark');
+        statusElement.textContent = isDark ? 'DARK' : 'LIGHT';
+        statusElement.className = isDark ? 'font-bold text-yellow-300' : 'font-bold text-white';
+      }
+    };
+
+    // Update immediately
+    updateDarkModeStatus();
+
+    // Set up observer to watch for class changes
+    const observer = new MutationObserver(updateDarkModeStatus);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const validFilesCount = files.filter(file => {
     const extension = file.name.split('.').pop()?.toLowerCase() || '';
     const supportedExtensions = ['log', 'txt', 'diff', 'patch', 'png', 'jpg', 'jpeg', 'json', 'js', 'ts', 'py', 'java', 'cpp', 'yaml', 'yml', 'md', 'csv', 'xml'];
@@ -107,6 +131,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-300">
+      {/* Dark mode test indicator */}
+      <div className="fixed top-20 right-4 z-50 p-2 bg-red-500 text-white text-xs rounded">
+        Dark Mode Test: <span className="font-bold" id="dark-mode-status">Checking...</span>
+      </div>
       {/* Enhanced Header */}
       <header className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-sm sticky top-0 z-40 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
