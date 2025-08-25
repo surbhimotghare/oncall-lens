@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import FileUploader from '@/components/FileUploader';
 import AnalysisResult from '@/components/AnalysisResult';
 import Settings from '@/components/Settings';
-import ThemeToggle from '@/components/ThemeToggle';
 import { analyzeIncident, getAnalysisResults, subscribeToProgress, ProgressUpdate, ApiError, ApiKeys, hasFrontendApiKeysConfigured } from '@/services/api';
 import { ChevronLeft, ChevronRight, Settings as SettingsIcon } from 'lucide-react';
 
@@ -142,8 +141,6 @@ export default function Home() {
               </div>
               
               <div className="flex items-center space-x-3">
-                <ThemeToggle />
-                
                 <button
                   onClick={() => setIsSettingsOpen(true)}
                   className={`p-3 rounded-xl transition-all duration-200 ${
