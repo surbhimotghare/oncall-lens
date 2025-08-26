@@ -291,7 +291,45 @@ graph TD
 
 ---
 
-## Slide 12: Competitive Advantages 🏆
+## Slide 12: "Can't ChatGPT Do This?" 🤖
+
+### **The $64,000 Question Everyone's Thinking**
+
+**Short Answer: No, not in the integrated, automated way we've built.**
+
+**What an engineer *could* manually try:**
+1. 🔍 Open ChatGPT
+2. 📋 Copy-paste log snippets *(hope you find the right ones)*
+3. 📄 Copy-paste the git diff *(if you remember what changed)*
+4. 📚 Copy-paste text from past postmortems *(if you can find them)*
+5. 📸 Upload dashboard screenshots *(one at a time)*
+6. ✍️ Write a detailed prompt *(and pray it works)*
+
+### **Why This Manual Approach Fails:**
+
+**🚫 No Private Knowledge Base**
+- ChatGPT has zero access to your company's incident history
+- Our RAG system automatically searches your entire postmortem database
+
+**⏱️ Inefficient Workflow** 
+- Manual process takes 30+ minutes vs. our 2-minute automation
+- Defeats the purpose of speeding up incident response
+
+**📏 Context Window Limits**
+- Complex incidents exceed ChatGPT's context limits
+- We use advanced retrieval to surface only relevant context
+
+**🎯 Lack of Specialization**
+- Generic responses vs. SRE-optimized analysis
+- Our prompts, parsing, and output are incident-response engineered
+
+**Our solution isn't just an LLM - it's an end-to-end automated system.**
+
+*Speaker Note: Address the elephant in the room head-on - this shows you understand the competitive landscape*
+
+---
+
+## Slide 13: Competitive Advantages 🏆
 
 ### **Why We Win**
 
@@ -319,7 +357,7 @@ graph TD
 
 ---
 
-## Slide 13: The Future Roadmap 🛣️
+## Slide 14: The Future Roadmap 🛣️
 
 ### **What's Next**
 
@@ -342,7 +380,7 @@ graph TD
 
 ---
 
-## Slide 14: The Hero's Return 🚀
+## Slide 15: The Hero's Return 🚀
 
 ### **Bringing the Elixir to All Kingdoms**
 
@@ -370,7 +408,7 @@ graph TD
 
 ---
 
-## Slide 15: Questions & Demo 🤔
+## Slide 16: Questions & Demo 🤔
 
 ### **Let's Dive Deeper**
 
