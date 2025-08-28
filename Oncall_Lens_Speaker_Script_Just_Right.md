@@ -119,33 +119,19 @@
 - Hero's New Powers
 
 ### **What You Say:**
-*[This is your big moment - speak with conviction but be honest]*
+*[Quick, confident delivery]*
 
-> "Now, I could tell you all day about what we built, but let me show you the proof. These are real results from our RAGAS evaluation framework on a synthetic dataset generated from actual postmortem data.
+> "Here's the proof - our RAGAS evaluation results on synthetic postmortem data:
 > 
-> *[Point to table]* Look at this dramatic improvement:
+> *[Point to table]* Answer accuracy: 16.3% to 87.5% - that's 437% improvement.
 > 
-> Answer accuracy went from 16.3% to 87.5% - that's a 437% improvement. 
+> Context precision: 75% to 92%. Context recall: 83% to 95%. Faithfulness: 26.7% to 89%.
 > 
-> Context precision jumped from 75% to 92% - a 23% boost in focus.
+> *[Quick transition]* Real-world incidents can be unpredictable, but our system gives engineers a massive head start.
 > 
-> Context recall improved from 83% to 95% - 14% better memory.
+> *[Point to powers]* Time control - minutes instead of hours. Enhanced vision - 90%+ accuracy. Wisdom amplified - 437% improvement in answer quality.
 > 
-> And faithfulness - how well our answers are grounded in actual data - went from 26.7% to 89%. That's a 233% increase in trust.
-> 
-> *[Pause, let that sink in]*
-> 
-> Now, let me be transparent - we tested this on synthetic data, and real-world incidents can be unpredictable, especially novel issues without historical context. But even for completely new incident types, our system gives engineers a significant head start.
-> 
-> What does this mean in the real world?
-> 
-> *[Point to powers section]* Time control - minutes instead of hours for incident diagnosis. Your sleep schedule will actually thank you.
-> 
-> Enhanced vision - over 90% accuracy across key metrics. That's a massive improvement from where teams are today.
-> 
-> And wisdom amplified - that 437% improvement in answer accuracy shows the power of advanced RAG techniques. Math doesn't lie, unlike that 'quick hotfix' we've all deployed at 3 AM.
-> 
-> *[Look directly at audience]* The hero has crossed the threshold and returned with supernatural aid."
+> The hero has crossed the threshold."
 
 **[Advance slide]**
 
@@ -160,25 +146,15 @@
 - Common challenges
 
 ### **What You Say:**
-*[More inclusive tone, speaking to the audience directly]*
+*[Quick, direct delivery]*
 
-> "So who are the heroes that benefit from this transformation?
+> "Who benefits? On-call engineers, SREs, DevOps teams - the real heroes in this room.
 > 
-> *[Gesture to audience]* Our primary users are the people in this room: On-call engineers - the real heroes on the front lines of incident response. SREs managing increasingly complex systems. DevOps teams who are the guardians of our infrastructure.
+> Plus engineering managers protecting their teams, and platform teams focused on reliability.
 > 
-> Our secondary users are the engineering managers trying to protect their teams from burnout, and platform teams focused on system reliability.
+> *[Point to challenges]* We all face the same battles: Production fires, post-incident analysis, knowledge transfer, pattern recognition.
 > 
-> *[Point to challenges]* We all share the same battles:
-> 
-> Production incident response - fighting fires in real-time.
-> 
-> Post-incident analysis - learning from past battles and war stories.
-> 
-> Knowledge transfer - sharing that hard-won wisdom with the team.
-> 
-> And pattern recognition - spotting those recurring issues before they become bigger problems.
-> 
-> *[Pause]* There are over 50,000 engineering organizations worldwide that need this solution. The market is massive, and the pain is real."
+> Over 50,000 engineering organizations worldwide need this solution."
 
 **[Advance slide]**
 
@@ -260,15 +236,13 @@
 - Result callout
 
 ### **What You Say:**
-*[Technical but enthusiastic]*
+*[Quick technical overview]*
 
-> "The secret sauce behind our 437% improvement in answer accuracy is our advanced retrieval system. We use six different strategies working together:
+> "Our secret sauce: six retrieval strategies working together.
 > 
-> *[Point to each]* Naive retrieval as our baseline. Parent Document retrieval that finds small, specific chunks but returns larger context. BM25 for keyword-based exact matching - essential for error codes and function names. Multi-Query retrieval that uses an LLM to generate multiple query variations. Hybrid search combining BM25 and semantic search with a 30-70 weighting. And Ensemble retrieval that combines all strategies with equal weighting.
+> *[Point to list]* Naive, Parent Document, BM25, Multi-Query, Hybrid, and Ensemble retrieval.
 > 
-> *[Point to result]* The result? Significant improvement across all retrieval metrics - we're averaging over 90% across key measures. This isn't just incremental improvement - this is what gives us that dramatic performance boost you saw earlier.
-> 
-> Most RAG systems use just one or two of these techniques. We use all six, and that's what sets us apart."
+> *[Point to result]* Result: over 90% average across key metrics. Most RAG systems use one or two techniques - we use all six."
 
 **[Advance slide]**
 
@@ -283,17 +257,15 @@
 - "Why Now?" factors
 
 ### **What You Say:**
-*[Business-focused, confident tone]*
+*[Quick business overview]*
 
-> "Let's talk about the opportunity. The DevOps tools market is exploding - from $8.2 billion in 2023 to a projected $25.5 billion by 2030.
+> "The opportunity: DevOps tools market $8.2B to $25.5B by 2030.
 > 
-> The incident management subset alone is $4.1 billion, and we're targeting over 50,000 engineering organizations globally.
+> Incident management subset: $4.1B. Target: 50K+ engineering organizations.
 > 
-> *[Point to segments]* We see three clear market segments: Startups with 10-50 engineers who are price-sensitive but need the efficiency. Scale-ups with 50-500 engineers focused on growth and reliability. And enterprises with 500+ engineers who need compliance and bulletproof reliability.
+> *[Point to segments]* Three segments: Startups (price-sensitive), Scale-ups (growth-focused), Enterprise (compliance-focused).
 > 
-> *[Point to "Why Now"]* Why is now the perfect time? Cloud complexity is increasing exponentially - every company is dealing with more services, more data, more potential failure points. AI and ML adoption in DevOps is accelerating. And remote work has made incident response even harder when your team is scattered across time zones.
-> 
-> *[Pause]* These are conservative estimates. The real market could be much larger as more companies embrace DevOps practices."
+> *[Point to "Why Now"]* Perfect timing: Cloud complexity exploding, AI/ML adoption accelerating, remote work challenges."
 
 **[Advance slide]**
 
@@ -307,17 +279,17 @@
 - Specific details for each phase
 
 ### **What You Say:**
-*[Strategic, methodical tone]*
+*[Quick strategic overview]*
 
-> "Our go-to-market strategy is a three-phase approach designed to build momentum and scale systematically.
+> "Three-phase GTM strategy:
 > 
-> *[Point to Phase 1]* Phase 1 is our Freemium SaaS launch, targeting small teams in the first six months. We'll offer a free tier with 10 incidents per month and a Pro tier at $29 per user per month. We'll launch through Product Hunt and developer communities where our audience already hangs out.
+> *[Point to phases]* Phase 1: Freemium SaaS - small teams, $29/user/month, Product Hunt launch.
 > 
-> *[Point to Phase 2]* Phase 2 moves into Enterprise sales from months 6 to 18. We're targeting large organizations with 500+ engineers, with custom pricing from $50K to $500K annually. This is where we build direct sales relationships and partner integrations.
+> Phase 2: Enterprise sales - 500+ engineers, $50K-$500K annually.
 > 
-> *[Point to Phase 3]* Phase 3 is our white-label strategy starting at month 12. We partner with monitoring vendors like Datadog and New Relic, sharing revenue at 30-50%. This gives us massive distribution without the customer acquisition cost.
+> Phase 3: White-label partnerships - Datadog, New Relic, 30-50% revenue share.
 > 
-> *[Pause for emphasis]* Conservative projections show $10 million in annual recurring revenue by Year 2. But given the market size and our performance advantages, we believe we can significantly exceed that."
+> Projection: $10M ARR by Year 2."
 
 **[Advance slide]**
 
@@ -332,17 +304,17 @@
 - Enterprise options
 
 ### **What You Say:**
-*[Technical confidence, forward-looking]*
+*[Quick technical overview]*
 
-> "We've built Oncall Lens for scale from day one.
+> "Built for scale from day one:
 > 
-> *[Point to architecture]* Our multi-tenant architecture isolates customer data while allowing horizontal scaling based on demand. We can deploy to regional data centers for sub-100-millisecond latency anywhere in the world.
+> *[Point to architecture]* Multi-tenant architecture, horizontal scaling, regional data centers for <100ms latency.
 > 
-> *[Point to cost structure]* Our cost structure is usage-based - customers pay per incident analyzed. We use elastic compute that scales up during incident spikes and scales back down during quiet periods. Efficient storage with vector compression and archiving keeps costs predictable.
+> *[Point to cost structure]* Usage-based pricing, elastic compute, efficient storage.
 > 
-> *[Point to enterprise]* For enterprise customers, we offer on-premise deployment for air-gapped environments, private cloud instances, and hybrid solutions that mix cloud and on-premise components.
+> *[Point to enterprise]* On-premise, private cloud, hybrid options.
 > 
-> *[Pause]* Our current architecture can handle over 10,000 concurrent incident analyses. As we scale, we simply add more compute and storage resources."
+> Can handle 10,000+ concurrent incidents."
 
 **[Advance slide]**
 
@@ -357,29 +329,17 @@
 - Why this approach fails
 
 ### **What You Say:**
-*[Address this head-on with confidence - you've anticipated this question]*
+*[Quick, confident response]*
 
-> "Alright, let's address the elephant in the room. I know exactly what some of you are thinking: 'Can't I just use ChatGPT for this?'
+> "The elephant in the room: 'Can't I just use ChatGPT?'
 > 
-> *[Pause, smile]* Short answer: No, not in the integrated, automated way we've built.
+> Short answer: No, not in the integrated way we've built.
 > 
-> *[Point to manual workflow]* Sure, an engineer could manually try to replicate what we do:
+> *[Point to manual workflow]* Sure, you could manually copy-paste logs, diffs, postmortems, write detailed prompts... but that takes 30+ minutes versus our 2-minute automation.
 > 
-> Open ChatGPT. Copy-paste log snippets - assuming you can find the right ones in 50GB of logs. Copy-paste the git diff - if you remember what changed. Copy-paste text from past postmortems - if you can even find them in your company's scattered documentation. Upload dashboard screenshots one at a time. Write a detailed prompt and pray it works.
+> *[Point to failures]* Why it fails: No access to your private incident history, context window limits, generic responses, inefficient workflow.
 > 
-> *[Pause for effect]* 
-> 
-> Here's why this manual approach fails every time:
-> 
-> *[Point to each failure mode]* First, ChatGPT has zero access to your company's private incident history. Our RAG system automatically searches your entire postmortem database - that's the biggest differentiator right there.
-> 
-> Second, that manual process takes 30+ minutes versus our 2-minute automation. You're literally defeating the purpose of speeding up incident response.
-> 
-> Third, complex incidents easily exceed ChatGPT's context window. We use advanced retrieval to surface only the most relevant context.
-> 
-> And fourth, ChatGPT gives generic responses. Our system is engineered specifically for SRE incident analysis - the prompts, parsing, and output format are all optimized for exactly what you need.
-> 
-> *[Look directly at audience]* Our solution isn't just an LLM. It's an end-to-end automated system that does in 2 minutes what would take you 30+ minutes manually - and does it better."
+> Our solution isn't just an LLM - it's an end-to-end automated system."
 
 **[Advance slide]**
 
@@ -393,21 +353,21 @@
 - Five key advantages
 
 ### **What You Say:**
-*[This is your victory lap - be confident but not arrogant]*
+*[Quick, confident delivery]*
 
-> "So why do we win in this market?
+> "Why we win:
 > 
-> *[Point to each advantage]* First, our multi-agent intelligence. This isn't just search - it's actual reasoning and synthesis. We have four specialized agents working together, while our competitors use monolithic systems.
+> *[Point to advantages]* Multi-agent intelligence - four specialized agents vs. monolithic systems.
 > 
-> Second, proven performance. That 437% improvement in answer accuracy isn't marketing - it's RAGAS-validated, reproducible results. Over 90% scores across key retrieval metrics.
+> Proven performance - 437% improvement, 90%+ scores.
 > 
-> Third, multi-modal processing. We handle logs, traces, diffs, and screenshots. Most competitors only handle text files.
+> Multi-modal processing - logs, traces, diffs, screenshots.
 > 
-> Fourth, speed. We deliver answers in minutes versus hours for traditional incident analysis, with real-time progress tracking so you know exactly what's happening.
+> Speed - minutes vs. hours with real-time tracking.
 > 
-> And fifth, our learning system. We build a knowledge base from every incident, so the system gets smarter over time. Every customer benefits from the collective learning of all customers.
+> Learning system - gets smarter with every incident.
 > 
-> *[Pause, look at audience]* This isn't incremental improvement. This is a paradigm shift in how we handle production incidents."
+> This isn't incremental - it's a paradigm shift."
 
 **[Advance slide]**
 
@@ -422,17 +382,17 @@
 - Long-term goals
 
 ### **What You Say:**
-*[Visionary tone, painting the future]*
+*[Quick future vision]*
 
-> "Let me show you where we're headed.
+> "Where we're headed:
 > 
-> *[Point to 6 months]* In the next six months, we're adding advanced image processing with GPT-4 Vision - imagine uploading a screenshot of your dashboard and getting instant analysis. Team collaboration features for coordinated incident response. And a mobile app for on-the-go analysis when you're not at your desk.
+> *[Point to timeline]* Next 6 months: GPT-4 Vision, team collaboration, mobile app.
 > 
-> *[Point to 12 months]* Over the next twelve months, we're building Graph RAG for service dependencies - understanding how services connect and predicting blast radius. Real-time monitoring integration that triggers analysis automatically. And fine-tuned, domain-specific models trained on your specific infrastructure.
+> Next 12 months: Graph RAG, real-time monitoring, fine-tuned models.
 > 
-> *[Point to long-term]* Long-term, we're working toward predictive incident prevention - stopping problems before they happen. Industry-specific solutions for healthcare, finance, e-commerce. And ultimately, autonomous incident resolution.
+> Long-term: Predictive prevention, industry solutions, autonomous resolution.
 > 
-> *[Pause]* We're not just solving today's problems. We're building tomorrow's infrastructure."
+> We're building tomorrow's infrastructure."
 
 **[Advance slide]**
 
